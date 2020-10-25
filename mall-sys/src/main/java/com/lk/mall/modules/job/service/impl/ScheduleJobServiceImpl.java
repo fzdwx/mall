@@ -6,32 +6,31 @@
  * 版权所有，侵权必究！
  */
 
-package io.renren.modules.job.service.impl;
+package com.lk.mall.modules.job.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import io.renren.common.utils.Constant;
-import io.renren.common.utils.PageUtils;
-import io.renren.common.utils.Query;
-import io.renren.modules.job.dao.ScheduleJobDao;
-import io.renren.modules.job.entity.ScheduleJobEntity;
-import io.renren.modules.job.service.ScheduleJobService;
-import io.renren.modules.job.utils.ScheduleUtils;
-import org.apache.commons.lang.StringUtils;
+import com.lk.mall.common.utils.Constant;
+import com.lk.mall.common.utils.PageUtils;
+import com.lk.mall.common.utils.Query;
+import com.lk.mall.modules.job.dao.ScheduleJobDao;
+import com.lk.mall.modules.job.entity.ScheduleJobEntity;
+import com.lk.mall.modules.job.service.ScheduleJobService;
+import com.lk.mall.modules.job.utils.ScheduleUtils;
 import org.quartz.CronTrigger;
 import org.quartz.Scheduler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.util.*;
 
-//@Service("scheduleJobService")
-@Service
+@Service("scheduleJobService")
 public class ScheduleJobServiceImpl extends ServiceImpl<ScheduleJobDao, ScheduleJobEntity> implements ScheduleJobService {
-	@Resource
+	@Autowired
     private Scheduler scheduler;
 	
 	/**
@@ -57,8 +56,8 @@ public class ScheduleJobServiceImpl extends ServiceImpl<ScheduleJobDao, Schedule
 
 		IPage<ScheduleJobEntity> page = this.page(
 			new Query<ScheduleJobEntity>().getPage(params),
-			new QueryWrapper <ScheduleJobEntity>().like(StringUtils.isNotBlank(beanName),"bean_name", beanName)
-		);
+			new QueryWrapper<ScheduleJobEntity>().like(StringUtils.isNotBlank(beanName), "bean_name", beanName)
+												 );
 
 		return new PageUtils(page);
 	}

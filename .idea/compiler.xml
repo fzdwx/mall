@@ -8,16 +8,18 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="mall-coupon" />
-        <module name="mall-order" />
         <module name="mall-sys" />
         <module name="mall-ware" />
+        <module name="mall-order" />
         <module name="mall-product" />
+        <module name="mall-generator" />
         <module name="mall-member" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="mall" target="1.8" />
       <module name="mall-coupon" target="1.8" />
+      <module name="mall-generator" target="1.8" />
       <module name="mall-member" target="1.8" />
       <module name="mall-order" target="1.8" />
       <module name="mall-product" target="1.8" />
@@ -28,6 +30,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="mall-coupon" options="-parameters" />
+      <module name="mall-generator" options="-parameters" />
       <module name="mall-member" options="-parameters" />
       <module name="mall-order" options="-parameters" />
       <module name="mall-product" options="-parameters" />
