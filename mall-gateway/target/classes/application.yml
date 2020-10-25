@@ -11,34 +11,35 @@ spring:
     # 网关
     gateway:
       routes:
+        # mall-product
         - id: product_route
           uri: lb://mall-product
           predicates:
             - Path=/api/product/**
           filters:
             - RewritePath=/api/(?<segment>.*),/$\{segment}
-
+        # mall-coupon
         - id: third_party_route
-          uri: lb://mall-third-party
+          uri: lb://mall-coupon
           predicates:
-            - Path=/api/thirdparty/**
+            - Path=/api/coupon/**
           filters:
-            - RewritePath=/api/thirdparty/(?<segment>.*),/$\{segment}
-
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+        # mall-member
         - id: member_route
           uri: lb://mall-member
           predicates:
             - Path=/api/member/**
           filters:
             - RewritePath=/api/(?<segment>.*),/$\{segment}
-
+        # mall-ware
         - id: ware_route
           uri: lb://mall-ware
           predicates:
             - Path=/api/ware/**
           filters:
             - RewritePath=/api/(?<segment>.*),/$\{segment}
-
+        # renren-fast
         - id: admin_route
           uri: lb://renren-fast
           predicates:
