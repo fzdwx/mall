@@ -22,7 +22,7 @@ import com.like.mall.common.utils.R;
  *
  * @author like
  * @email 980650920@qq.com
- * @date 2020-10-25 10:45:49
+ * @date 2020-10-25 11:35:48
  */
 @RestController
 @RequestMapping("product/spuinfo")
