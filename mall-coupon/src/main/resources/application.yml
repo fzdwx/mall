@@ -14,6 +14,9 @@ spring:
         server-addr: 47.112.150.204:8848
   application:
     name: mall-coupon
+
+
+
 # mybatis设置
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml
