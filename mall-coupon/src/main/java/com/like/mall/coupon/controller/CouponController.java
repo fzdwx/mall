@@ -5,6 +5,8 @@ import com.like.mall.common.utils.R;
 import com.like.mall.coupon.entity.CouponEntity;
 import com.like.mall.coupon.service.CouponService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -20,18 +22,33 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("coupon/coupon")
+@RefreshScope // 动态刷新config
 public class CouponController {
     @Autowired
     private CouponService couponService;
+    // 从配置文件中获取
+    @Value("${my.name}")
+    private String myName;
+
+    @GetMapping("/test/config")
+    public R testConfigToNacos() {
+        return R
+                .ok()
+                .put("user", myName);
+    }
 
     /**
      * 测试 member 远程调用方法
+     *
      * @return r
      */
     @GetMapping("/member/list")
     public R memberCoupons() {
-        return R.ok().put("coupons","这里是coupons");
+        return R
+                .ok()
+                .put("coupons", "这里是coupons");
     }
+
 
     /**
      * 列表
