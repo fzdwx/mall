@@ -1,6 +1,5 @@
 server:
   port: 7000
-
 spring:
   # 数据源
   datasource:
@@ -8,6 +7,13 @@ spring:
     password: root
     url: jdbc:mysql://47.112.150.204:3306/mall-sale
     driver-class-name: com.mysql.jdbc.Driver
+  # 微服务
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 47.112.150.204:8848
+  application:
+    name: mall-coupon
 # mybatis设置
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml
