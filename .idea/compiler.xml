@@ -15,14 +15,12 @@
         <module name="mall-product" />
         <module name="mall-generator" />
         <module name="mall-member" />
-        <module name="renren-generator" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
+    <bytecodeTargetLevel target="8">
       <module name="mall" target="1.8" />
       <module name="mall-common" target="1.8" />
       <module name="mall-coupon" target="1.8" />
-      <module name="mall-generator" target="1.8" />
       <module name="mall-member" target="1.8" />
       <module name="mall-order" target="1.8" />
       <module name="mall-product" target="1.8" />
@@ -35,10 +33,9 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="mall-common" options="-parameters" />
       <module name="mall-coupon" options="" />
-      <module name="mall-generator" options="-parameters" />
       <module name="mall-member" options="" />
       <module name="mall-order" options="" />
-      <module name="mall-product" options="" />
+      <module name="mall-product" options="-parameters" />
       <module name="mall-sys" options="-parameters" />
       <module name="mall-ware" options="" />
       <module name="renren-generator" options="-parameters" />
