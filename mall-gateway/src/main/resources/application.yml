@@ -1,0 +1,24 @@
+server:
+  port: 88
+spring:
+  # 微服务
+  cloud:
+    # nacos
+    nacos:
+      # 服务发现
+      discovery:
+        server-addr: 47.112.150.204:8848
+    # 网关
+    gateway:
+      routes:
+        - id: test_go_baidu
+          uri: https://www.baidu.com/
+          predicates:
+            - Query=url,qq         # 携带参数url且值为baidu
+
+        - id: test_go_qq
+          uri: https://www.qq.com
+          predicates:  # 断言规则
+            - Query=url,qq      # 携带参数url且值为qq
+  application:
+    name: mall-gateway
