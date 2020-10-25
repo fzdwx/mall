@@ -8,9 +8,9 @@
 
 package io.renren.service;
 
-import com.lk.mall.datasource.annotation.DataSource;
-import com.lk.mall.modules.sys.dao.SysUserDao;
-import com.lk.mall.modules.sys.entity.SysUserEntity;
+import com.like.mall.datasource.annotation.DataSource;
+import com.like.mall.modules.sys.dao.SysUserDao;
+import com.like.mall.modules.sys.entity.SysUserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
