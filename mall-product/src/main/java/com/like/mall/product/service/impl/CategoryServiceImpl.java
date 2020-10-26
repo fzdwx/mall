@@ -44,6 +44,13 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     }
 
+    @Override
+    public void removeMenu(List<Long> asList) {
+        // TODO: 2020/10/26 1.删除标签：检查是否被引用
+        // 现在使用逻辑删除
+        baseMapper.deleteBatchIds(asList);
+    }
+
     /**
      * 查找当前标签的子标签
      *
