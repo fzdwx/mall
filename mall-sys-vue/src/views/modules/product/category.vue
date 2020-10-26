@@ -6,6 +6,7 @@
       :expand-on-click-node="false"
       node-key="catId"
       show-checkbox="true"
+      default-expanded-keys="expandKey"
     >
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <!-- 显示标题 -->
@@ -29,7 +30,8 @@
 export default {
   data() {
     return {
-      menus: [],
+      menus: [], //* 菜单信息
+      expandKey: [], //* 默认展开菜单，
       defaultProps: {
         children: 'children',
         label: 'name',
@@ -42,13 +44,29 @@ export default {
     //* 删除一个节点
     remove(node, data) {
       let idList = [data.catId]
-      this.$http({
-        url: this.$http.adornUrl('/product/category/delete'),
-        method: 'post',
-        data: this.$http.adornData(idList, false),
-      }).then(({ data }) => {
-        //* 调用获取数据按钮
-        this.getmenu()
+      this.$confirm(`是否删除【${data.name}】菜单, 是否继续?`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+        //* 确定删除
+      }).then(() => {
+        this.$http({
+          url: this.$http.adornUrl('/product/category/delete'),
+          method: 'post',
+          data: this.$http.adornData(idList, false),
+        })
+          .then(({ data }) => {
+            //* 调用获取数据按钮
+            this.getmenu()
+            //* 设置展开的菜单
+            this.expandKey=[node.parent.data.catId]
+            this.$message({
+              type: 'success',
+              message: '删除成功!',
+            })
+          })
+           //* 取消删除
+          .catch(() => {})
       })
     },
     //
