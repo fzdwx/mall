@@ -3,9 +3,9 @@
     <el-tree
       :data="menus"
       :props="defaultProps"
-      :expand-on-click-node="false" 
-      show-checkbox="true"
+      :expand-on-click-node="false"
       node-key="catId"
+      show-checkbox="true"
     >
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <!-- 显示标题 -->
@@ -37,14 +37,21 @@ export default {
     }
   },
   methods: {
-    // 添加一个节点
-    append(data) {
-     
-    },
-    // 删除一个节点
+    //* 添加一个节点
+    append(data) {},
+    //* 删除一个节点
     remove(node, data) {
-    
+      let idList = [data.catId]
+      this.$http({
+        url: this.$http.adornUrl('/product/category/delete'),
+        method: 'post',
+        data: this.$http.adornData(idList, false),
+      }).then(({ data }) => {
+        //* 调用获取数据按钮
+        this.getmenu()
+      })
     },
+    //
     // 获取分类信息
     getmenu() {
       // 发送请求
