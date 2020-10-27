@@ -47,7 +47,7 @@ public class CategoryController {
 
         return R
                 .ok()
-                .put("category", category);
+                .put("data", category);
     }
 
     /**
