@@ -25,11 +25,18 @@
         </span>
       </span>
     </el-tree>
+
     <!--对话框 -->
-    <el-dialog title="编辑分类" :visible.sync="dialogFormVisible">
+    <el-dialog title="编辑分类" :visible.sync="dialogFormVisible" :close-on-click-modal="false">
       <el-form :model="category">
         <el-form-item label="分类名称">
           <el-input v-model="category.name" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="分类图标">
+          <el-input v-model="category.icon" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="计量单位">
+          <el-input v-model="category.productUnit" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -52,6 +59,8 @@ export default {
         showStatus: 1,
         sort: 0,
         catId: 0,
+        icon: '', //* 图标
+        productUnit: '', //* 计量单位
       },
       dialogType: '', //* 对话框类型 edit，add
       dialogFormVisible: false, //* dialog 默认关闭
@@ -84,16 +93,19 @@ export default {
             message: '编辑成功!',
           })
         })
-        //* 编辑
-      } else {
+      } //* 编辑
+      else {
+        //* 解构对象
+        let { catId, name, icon, productUnit } = this.category
+        var editData = { catId, name, icon, productUnit }
         this.$http({
           url: this.$http.adornUrl('/product/category/update'),
           method: 'POST',
-          data: this.$http.adornData(this.category, false),
+          data: this.$http.adornData(editData, false),
         }).then(() => {
           //* 保存成功，关闭对话框
           this.dialogFormVisible = false
-          //* 获取数据
+          //* 刷新数据
           this.getmenu()
           //* 设置打开标签
           this.expandKey = [this.category.catId, this.category.parentCid]
@@ -108,8 +120,18 @@ export default {
     edit(data) {
       this.dialogType = 'edit'
       this.dialogFormVisible = true
-      this.category.name = data.name
-      this.category.catId = data.catId
+      //* 发送请求获取最新数据
+      this.$http({
+        url: this.$http.adornUrl('/product/category/info/' + data.catId),
+        method: 'get',
+      }).then(({ data }) => {
+        console.log('最新的数据', data.data)
+        //* 回显数据
+        this.category.name = data.data.name
+        this.category.catId = data.data.catId
+        this.category.icon = data.data.icon
+        this.category.productUnit = data.data.productUnit
+      })
     },
     //* 打开对话框
     add(data) {
