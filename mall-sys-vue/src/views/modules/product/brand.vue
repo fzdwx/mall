@@ -7,7 +7,9 @@
       <el-form-item>
         <el-button @click="getDataList()">查询</el-button>
         <el-button v-if="isAuth('product:brand:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
-        <el-button v-if="isAuth('product:brand:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button>
+        <el-button v-if="isAuth('product:brand:delete')" type="danger" @click="deleteHandle()"
+                   :disabled="dataListSelections.length <= 0">批量删除
+        </el-button>
       </el-form-item>
     </el-form>
     <el-table
@@ -50,7 +52,13 @@
         prop="showStatus"
         header-align="center"
         align="center"
-        label="显示状态[0-不显示；1-显示]">
+        label="显示状态">
+        <!--按钮修改显示状态-->
+        <template slot-scope="scope">
+          <el-switch v-model="scope.row.showStatus" active-color="#13ce66" :active-value="1" inactive-color="#ff4949"
+                     :inactive-value="0"
+                     @change="changeShowStatus(scope.row)"></el-switch>
+        </template>
       </el-table-column>
       <el-table-column
         prop="firstLetter"
@@ -91,103 +99,120 @@
 </template>
 
 <script>
-  import AddOrUpdate from './brand-add-or-update'
-  export default {
-    data () {
-      return {
-        dataForm: {
-          key: ''
-        },
-        dataList: [],
-        pageIndex: 1,
-        pageSize: 10,
-        totalPage: 0,
-        dataListLoading: false,
-        dataListSelections: [],
-        addOrUpdateVisible: false
-      }
+import AddOrUpdate from './brand-add-or-update'
+
+export default {
+  data() {
+    return {
+      dataForm: {
+        key: ''
+      },
+      dataList: [],
+      pageIndex: 1,
+      pageSize: 10,
+      totalPage: 0,
+      dataListLoading: false,
+      dataListSelections: [],
+      addOrUpdateVisible: false
+    }
+  },
+  components: {
+    AddOrUpdate
+  },
+  activated() {
+    this.getDataList()
+  },
+  methods: {
+    // 改变图片的显示状态
+    changeShowStatus(data) {
+      console.log(data)
+      // 只需要发送brandId 和 showStatus -> 结构
+      let {brandId, showStatus} = data;
+      this.$http({
+        url: this.$http.adornUrl('/product/brand/update'),
+        method: 'post',
+        data: this.$http.adornData({brandId, showStatus}, false)
+      }).then(({data}) => {
+        this.$message({
+          type: "success",
+          message: "更新成功",
+        })
+      });
     },
-    components: {
-      AddOrUpdate
+    // 获取数据列表
+    getDataList() {
+      this.dataListLoading = true
+      this.$http({
+        url: this.$http.adornUrl('/product/brand/list'),
+        method: 'get',
+        params: this.$http.adornParams({
+          'page': this.pageIndex,
+          'limit': this.pageSize,
+          'key': this.dataForm.key
+        })
+      }).then(({data}) => {
+        if (data && data.code === 0) {
+          this.dataList = data.page.list
+          this.totalPage = data.page.totalCount
+        } else {
+          this.dataList = []
+          this.totalPage = 0
+        }
+        this.dataListLoading = false
+      })
     },
-    activated () {
+    // 每页数
+    sizeChangeHandle(val) {
+      this.pageSize = val
+      this.pageIndex = 1
       this.getDataList()
     },
-    methods: {
-      // 获取数据列表
-      getDataList () {
-        this.dataListLoading = true
+    // 当前页
+    currentChangeHandle(val) {
+      this.pageIndex = val
+      this.getDataList()
+    },
+    // 多选
+    selectionChangeHandle(val) {
+      this.dataListSelections = val
+    },
+    // 新增 / 修改
+    addOrUpdateHandle(id) {
+      this.addOrUpdateVisible = true
+      this.$nextTick(() => {
+        this.$refs.addOrUpdate.init(id)
+      })
+    },
+    // 删除
+    deleteHandle(id) {
+      var ids = id ? [id] : this.dataListSelections.map(item => {
+        return item.brandId
+      })
+      this.$confirm(`确定对[id=${ids.join(',')}]进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
         this.$http({
-          url: this.$http.adornUrl('/product/brand/list'),
-          method: 'get',
-          params: this.$http.adornParams({
-            'page': this.pageIndex,
-            'limit': this.pageSize,
-            'key': this.dataForm.key
-          })
+          url: this.$http.adornUrl('/product/brand/delete'),
+          method: 'post',
+          data: this.$http.adornData(ids, false)
         }).then(({data}) => {
           if (data && data.code === 0) {
-            this.dataList = data.page.list
-            this.totalPage = data.page.totalCount
+            this.$message({
+              message: '操作成功',
+              type: 'success',
+              duration: 1500,
+              onClose: () => {
+                this.getDataList()
+              }
+            })
           } else {
-            this.dataList = []
-            this.totalPage = 0
+            this.$message.error(data.msg)
           }
-          this.dataListLoading = false
         })
-      },
-      // 每页数
-      sizeChangeHandle (val) {
-        this.pageSize = val
-        this.pageIndex = 1
-        this.getDataList()
-      },
-      // 当前页
-      currentChangeHandle (val) {
-        this.pageIndex = val
-        this.getDataList()
-      },
-      // 多选
-      selectionChangeHandle (val) {
-        this.dataListSelections = val
-      },
-      // 新增 / 修改
-      addOrUpdateHandle (id) {
-        this.addOrUpdateVisible = true
-        this.$nextTick(() => {
-          this.$refs.addOrUpdate.init(id)
-        })
-      },
-      // 删除
-      deleteHandle (id) {
-        var ids = id ? [id] : this.dataListSelections.map(item => {
-          return item.brandId
-        })
-        this.$confirm(`确定对[id=${ids.join(',')}]进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          this.$http({
-            url: this.$http.adornUrl('/product/brand/delete'),
-            method: 'post',
-            data: this.$http.adornData(ids, false)
-          }).then(({data}) => {
-            if (data && data.code === 0) {
-              this.$message({
-                message: '操作成功',
-                type: 'success',
-                duration: 1500,
-                onClose: () => {
-                  this.getDataList()
-                }
-              })
-            } else {
-              this.$message.error(data.msg)
-            }
-          })
-        })
-      }
+      })
     }
   }
+}
 </script>
