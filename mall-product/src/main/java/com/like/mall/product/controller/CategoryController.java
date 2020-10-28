@@ -13,8 +13,9 @@ import java.util.Map;
 
 /**
  * 商品三级分类
- *  使用地方：
- *      商品系统-分类维护
+ * 使用地方：
+ * 商品系统-分类维护
+ *
  * @author like
  * @email 980650920@qq.com
  * @date 2020-10-25 11:35:49
@@ -35,6 +36,28 @@ public class CategoryController {
         return R
                 .ok()
                 .put("data", entities);
+    }
+
+    /**
+     * 拖拽修改功能
+     *
+     * @param category
+     * @return
+     */
+    @PostMapping("/update/drag")
+    public R updateDrag(@RequestBody CategoryEntity[] category) {
+        categoryService.updateBatchById(Arrays.asList(category));
+        return R.ok();
+    }
+
+    /**
+     * 删除
+     */
+    @PostMapping("/delete")
+    public R delete(@RequestBody Long[] catIds) {
+        // 1.删除标签：检查是否被引用
+        categoryService.removeMenu(Arrays.asList(catIds));
+        return R.ok();
     }
 
 
@@ -67,16 +90,6 @@ public class CategoryController {
     public R update(@RequestBody CategoryEntity category) {
         categoryService.updateById(category);
 
-        return R.ok();
-    }
-
-    /**
-     * 删除
-     */
-    @PostMapping("/delete")
-    public R delete(@RequestBody Long[] catIds) {
-        // 1.删除标签：检查是否被引用
-        categoryService.removeMenu(Arrays.asList(catIds));
         return R.ok();
     }
 

@@ -1,3 +1,4 @@
+<!--产品分类维护-->
 <template>
   <div>
     <!-- 树形 -->
@@ -8,6 +9,8 @@
       node-key="catId"
       show-checkbox
       :default-expanded-keys="expandKey"
+      @node-drop="handleDrop"
+      draggable
     >
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <!-- 显示标题 -->
@@ -48,9 +51,16 @@
 </template>
 
 <script>
+import http from "../../../utils/httpRequest";
+
 export default {
+  created() {
+    this.getmenu()
+  },
   data() {
     return {
+      maxLevel: 1, //* 拖拽节点时，计算的最大节点等级
+      updateNodes: [],
       //* 分类对象
       category: {
         name: '',
@@ -74,10 +84,91 @@ export default {
     }
   },
   methods: {
+    // 拖拽成功
+    handleDrop(draggingNode, dropNode, dropType) {
+      console.log('成功')
+      // 1.当前节点的最新的父节点id
+      let curNodeParentId = 0;
+      let siblings = null; // 兄弟节点
+      if (dropType === "before" || dropType === "after") { // 同层级拖动
+        curNodeParentId = dropNode.parent.data.catId === undefined ? 0 : dropNode.parent.data.catId;
+        siblings = dropNode.parent.childNodes
+      } else { // inner
+        curNodeParentId = dropNode.data.catId;
+        siblings = dropNode.childNodes;
+      }
+      // 2.当前拖拽节点的最新顺序
+      for (let i = 0; i < siblings.length; i++) {
+        if (siblings[i].data.catId === draggingNode.data.catId) {
+          let currCatLevel = draggingNode.level;
+          // 如果遍历的是正在拖拽的节点
+          if (siblings[i].level !== draggingNode.level) {
+            // 修改当前节点的层级
+            currCatLevel = siblings[i].level;
+            // 修改子节点的层级
+            this.updateChNodeLevel(siblings[i])
+            // if (dropType === "before" || dropType === "after") {
+            //   currCatLevel = dropNode.level;
+            // } else {// inner
+            //   currCatLevel = dropNode.level + 1;
+            // }
+          }
+          this.updateNodes.push({catId: siblings[i].data.catId, sort: i, patentCid: curNodeParentId});
+        } else {
+          this.updateNodes.push({catId: siblings[i].data.catId, sort: i})
+        }
+      }
+      // 3.当前拖拽节点的最新层级
+      this.$http({
+        url: this.$http.adornUrl('/product/category/update/drag'),
+        method: 'post',
+        data: this.$http.adornData(this.updateNodes, false)
+      }).then(({data}) => {
+        this.$message({
+          message: "菜单顺序修改成功",
+          type:"success",
+        });
+      });
+    },
+    // 修改子节点的等级
+    updateChNodeLevel(chNode) {
+      for (let i = 0; i < chNode.childNodes.length; i++) {
+        let currNode = chNode.childNodes[i].data;
+        this.updateNodes.push({catId: currNode.catId, catLevel: chNode.childNodes[i].level})
+        // 递归
+        this.countNodeLevel(chNode.childNodes[i])
+      }
+    },
+    // 是否允许拖拽
+    allowDrop(draggingNode, dropNode, type) {
+      //1.能被拖动的节点和其所在父节点的总层数不能大于3
+      this.maxLevel = 0; // 重新复制
+      let level = this.countNodeLevel(draggingNode.data)
+      let deep = level - draggingNode.data.catLevel + 1
+      // draggingNode.data.catLevel 深度
+      if (type === "inner") {
+        return (deep + dropNode.level) <= 3;
+      } else {
+        return (deep + dropNode.parent.level) <= 3;
+      }
+    },
+    // 计算节点的等级
+    countNodeLevel(node) {
+      // 如果有子节点
+      if (node.children != null && node.children.length > 0) {
+        for (let i = 0; i < node.children.length; i++) {
+          if (node.children[1].catLevel > this.maxLevel) {
+            this.maxLevel = node.children[1].catLevel
+          }
+          this.countNodeLevel(node.children[i])
+        }
+      }
+      return this.maxLevel;
+    },
     //* 提交分类
     submitCategory(data) {
       //* 添加
-      if (this.dialogType == 'add') {
+      if (this.dialogType === 'add') {
         this.$http({
           url: this.$http.adornUrl('/product/category/save'),
           method: 'POST',
@@ -96,8 +187,8 @@ export default {
       } //* 编辑
       else {
         //* 解构对象
-        let { catId, name, icon, productUnit } = this.category
-        var editData = { catId, name, icon, productUnit }
+        let {catId, name, icon, productUnit} = this.category
+        let editData = {catId, name, icon, productUnit}
         this.$http({
           url: this.$http.adornUrl('/product/category/update'),
           method: 'POST',
@@ -124,7 +215,7 @@ export default {
       this.$http({
         url: this.$http.adornUrl('/product/category/info/' + data.catId),
         method: 'get',
-      }).then(({ data }) => {
+      }).then(({data}) => {
         console.log('最新的数据', data.data)
         //* 回显数据
         this.category.name = data.data.name
@@ -141,11 +232,20 @@ export default {
       this.category.parentCid = data.catId
       this.category.catLevel = data.catLevel * 1 + 1
       this.category.name = ''
-      this.category.catId =0
-      this.category.showStatus=1
-      this.category.sort=0
-      this.category.icon=''
-      this.category.productUnit=''
+      this.category.catId = 0
+      this.category.showStatus = 1
+      this.category.sort = 0
+      this.category.icon = ''
+      this.category.productUnit = ''
+    },
+    // 获取分类信息
+    getmenu() {
+      // 发送请求
+      this.$http({
+        url: this.$http.adornUrl('/product/category/list/tree'),
+        method: 'GET',
+        // 赋值
+      }).then((res) => (this.menus = res.data.data))
     },
     //* 删除一个节点
     remove(node, data) {
@@ -161,7 +261,7 @@ export default {
           method: 'post',
           data: this.$http.adornData(idList, false),
         })
-          .then(({ data }) => {
+          .then(({data}) => {
             //* 调用获取数据按钮
             this.getmenu()
             //* 设置展开的菜单
@@ -175,23 +275,11 @@ export default {
             })
           })
           //* 取消删除
-          .catch(() => {})
+          .catch(() => {
+          })
       })
     },
-    //
-    // 获取分类信息
-    getmenu() {
-      // 发送请求
-      this.$http({
-        url: this.$http.adornUrl('/product/category/list/tree'),
-        method: 'GET',
-        // 赋值
-      }).then((res) => (this.menus = res.data.data))
-    },
-  },
-  created() {
-    this.getmenu()
-  },
+  }
 }
 </script>
 <style>
