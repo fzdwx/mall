@@ -41,7 +41,7 @@ public class CategoryController {
     /**
      * 拖拽修改功能
      *
-     * @param category
+     * @param category 需要修改的分类数组
      * @return
      */
     @PostMapping("/update/drag")

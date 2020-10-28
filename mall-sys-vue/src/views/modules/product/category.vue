@@ -1,6 +1,10 @@
 <!--产品分类维护-->
 <template>
   <div>
+    <!--开关-->
+    <el-switch v-model="draggable" active-text="开启拖拽" inactive-text="关闭拖拽"></el-switch>
+    <el-button @click="saveBach">保存拖拽结果</el-button>
+    <el-button @click="delBach" type="danger">批量删除</el-button>
     <!-- 树形 -->
     <el-tree
       :data="menus"
@@ -10,7 +14,8 @@
       show-checkbox
       :default-expanded-keys="expandKey"
       @node-drop="handleDrop"
-      draggable
+      :draggable="draggable"
+      ref="tree"
     >
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <!-- 显示标题 -->
@@ -59,6 +64,7 @@ export default {
   },
   data() {
     return {
+      draggable: false, // 是否开启拖拽
       maxLevel: 1, //* 拖拽节点时，计算的最大节点等级
       updateNodes: [],
       //* 分类对象
@@ -84,6 +90,52 @@ export default {
     }
   },
   methods: {
+    delBach() {
+      // 批量删除
+      let checkedNodes = this.$refs.tree.getCheckedNodes()
+      let idList = [];
+      for (let i = 0; i < checkedNodes.length; i++) {
+        idList.push(checkedNodes[i].catId);
+      }
+      this.$confirm(`即将批量删除【${idList}】, 是否继续?`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+        //* 确定删除
+      }).then(() => {
+        // 发送请求
+        this.$http({
+          url: this.$http.adornUrl('/product/category/delete'),
+          method: 'post',
+          data: this.$http.adornData(idList, false)
+        }).then(() => {
+          //* 调用获取数据按钮
+          this.getmenu()
+          //* 设置展开的菜单
+          this.expandKey = [
+            checkedNodes.parent.catId,
+            checkedNodes.parent.patentCid,
+          ]
+          this.$message({
+            type: 'success',
+            message: '删除成功!',
+          })
+        });
+      }).catch(() => {});
+    },
+    saveBach() {
+      // 保存拖拽结果
+      this.$http({
+        url: this.$http.adornUrl('/product/category/update/drag'),
+        method: 'post',
+        data: this.$http.adornData(this.updateNodes, false)
+      }).then(({data}) => {
+        this.$message({
+          message: "菜单顺序修改成功",
+          type: "success",
+        });
+      });
+    },
     // 拖拽成功
     handleDrop(draggingNode, dropNode, dropType) {
       console.log('成功')
@@ -118,17 +170,9 @@ export default {
           this.updateNodes.push({catId: siblings[i].data.catId, sort: i})
         }
       }
+      this.maxLevel = 0; // 重新复制
+      this.updateNodes = []; // 重置
       // 3.当前拖拽节点的最新层级
-      this.$http({
-        url: this.$http.adornUrl('/product/category/update/drag'),
-        method: 'post',
-        data: this.$http.adornData(this.updateNodes, false)
-      }).then(({data}) => {
-        this.$message({
-          message: "菜单顺序修改成功",
-          type:"success",
-        });
-      });
     },
     // 修改子节点的等级
     updateChNodeLevel(chNode) {
@@ -142,9 +186,8 @@ export default {
     // 是否允许拖拽
     allowDrop(draggingNode, dropNode, type) {
       //1.能被拖动的节点和其所在父节点的总层数不能大于3
-      this.maxLevel = 0; // 重新复制
       let level = this.countNodeLevel(draggingNode.data)
-      let deep = level - draggingNode.data.catLevel + 1
+      let deep = level - draggingNode.level + 1
       // draggingNode.data.catLevel 深度
       if (type === "inner") {
         return (deep + dropNode.level) <= 3;
