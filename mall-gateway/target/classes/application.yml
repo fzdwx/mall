@@ -11,6 +11,13 @@ spring:
     # 网关
     gateway:
       routes:
+        # mall-party
+        - id: party_route
+          uri: lb://mall-party
+          predicates:
+            - Path=/api/party/**
+          filters:
+            - RewritePath=/api/party/(?<segment>.*),/$\{segment}
         # mall-product
         - id: product_route
           uri: lb://mall-product
@@ -19,7 +26,7 @@ spring:
           filters:
             - RewritePath=/api/(?<segment>.*),/$\{segment}
         # mall-coupon
-        - id: third_party_route
+        - id: coupon_route
           uri: lb://mall-coupon
           predicates:
             - Path=/api/coupon/**
