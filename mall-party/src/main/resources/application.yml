@@ -1,0 +1,16 @@
+spring:
+  # 微服务
+  cloud:
+    # oss 上传文件信息
+    alicloud:
+      access-key: LTAI4GDWQRSFJAaoA3kYqPP2
+      secret-key: Pon4EtUVlZBtsAutlPGC5iCkHyaSnL
+      oss:
+        endpoint: oss-cn-shenzhen.aliyuncs.com
+    nacos:
+      server-addr: 47.112.150.204:8848
+  application:
+    name: mall-party
+
+server:
+  port: 13000

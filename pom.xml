@@ -17,6 +17,7 @@
         <module>mall-product</module>
         <module>mall-ware</module>
         <module>mall-sys</module>
+        <module>mall-party</module>
     </modules>
 
 </project>
