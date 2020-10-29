@@ -7,6 +7,7 @@ spring:
       secret-key: Pon4EtUVlZBtsAutlPGC5iCkHyaSnL
       oss:
         endpoint: oss-cn-shenzhen.aliyuncs.com
+        bucket: mall-like
     nacos:
       server-addr: 47.112.150.204:8848
   application:
