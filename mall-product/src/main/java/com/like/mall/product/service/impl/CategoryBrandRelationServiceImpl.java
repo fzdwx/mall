@@ -49,4 +49,22 @@ public class CategoryBrandRelationServiceImpl extends ServiceImpl<CategoryBrandR
         save(categoryBrandRelation);
     }
 
+    // 级联更新
+    @Override
+    public void updateBrand(String name, Long brandId) {
+        QueryWrapper<CategoryBrandRelationEntity> query = new QueryWrapper<>();
+        CategoryBrandRelationEntity categoryBrandRelationEntity = CategoryBrandRelationEntity
+                .builder()
+                .brandId(brandId)
+                .brandName(name)
+                .build();
+        query.eq("brand_id",brandId);
+        this.update(categoryBrandRelationEntity,query);
+    }
+
+    @Override
+    public void updateCategory(CategoryEntity category) {
+        baseMapper.updateCategory(category.getCatId(), category.getName());
+    }
+
 }

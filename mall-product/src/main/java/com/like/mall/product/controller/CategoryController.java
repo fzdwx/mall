@@ -51,6 +51,16 @@ public class CategoryController {
     }
 
     /**
+     * 级联修改
+     */
+    @RequestMapping("/update")
+    public R update(@RequestBody CategoryEntity category) {
+        categoryService.updateDetail(category);
+
+        return R.ok();
+    }
+
+    /**
      * 删除
      */
     @PostMapping("/delete")
@@ -79,16 +89,6 @@ public class CategoryController {
     @PostMapping("/save")
     public R save(@RequestBody CategoryEntity category) {
         categoryService.save(category);
-
-        return R.ok();
-    }
-
-    /**
-     * 修改
-     */
-    @RequestMapping("/update")
-    public R update(@RequestBody CategoryEntity category) {
-        categoryService.updateById(category);
 
         return R.ok();
     }

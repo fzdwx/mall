@@ -7,7 +7,9 @@ import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.Query;
 import com.like.mall.product.dao.CategoryDao;
 import com.like.mall.product.entity.CategoryEntity;
+import com.like.mall.product.service.CategoryBrandRelationService;
 import com.like.mall.product.service.CategoryService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -58,17 +60,33 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         List<Long> paths = findParentPaths(catelogId, new ArrayList<>());
         // 孙/子/父 -> 反转
         Collections.reverse(paths);
-        return  paths.toArray(new Long[paths.size()]);
+        return paths.toArray(new Long[paths.size()]);
+    }
+
+    @Autowired
+    private CategoryBrandRelationService categoryBrandRelationService;
+
+    /**
+     * 级联更新所有关联的数据
+     *
+     * @param category
+     */
+    @Override
+    public void updateDetail(CategoryEntity category) {
+        // 1.先更新自己
+        updateById(category);
+        // 2.更新和品牌相关的内容
+        categoryBrandRelationService.updateCategory(category);
     }
 
     // 递归收集父节点
-    private List<Long> findParentPaths(Long catelogId,List<Long> paths ) {
+    private List<Long> findParentPaths(Long catelogId, List<Long> paths) {
         // 1.收集当前节点id
         paths.add(catelogId);
         // 2.寻找是否有父亲
         CategoryEntity category = getById(catelogId);
         if (category.getParentCid() != 0) {
-            findParentPaths(category.getParentCid(),paths); // 递归
+            findParentPaths(category.getParentCid(), paths); // 递归
         }
         return paths;
     }
