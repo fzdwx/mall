@@ -3,6 +3,7 @@ package com.like.mall.product.entity;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.like.mall.common.valid.Add;
+import com.like.mall.common.valid.ListValue;
 import com.like.mall.common.valid.Update;
 import lombok.Data;
 import org.hibernate.validator.constraints.URL;
@@ -47,11 +48,12 @@ public class BrandEntity implements Serializable {
 	/**
 	 * 显示状态[0-不显示；1-显示]
 	 */
+	@ListValue(ints ={0,1}) // 自定义校验注解
 	private Integer showStatus;
 	/**
 	 * 检索首字母
 	 */
-	@Pattern(regexp = "/^[a-zA-Z]$/",message = "检索字母必须是一个a-zA-Z之间的字母")
+	@Pattern(regexp = "^[a-zA-Z]$",message = "检索字母必须是一个a-zA-Z之间的字母")
 	@NotNull
 	private String firstLetter;
 	/**
