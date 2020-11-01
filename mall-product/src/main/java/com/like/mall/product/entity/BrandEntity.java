@@ -2,6 +2,8 @@ package com.like.mall.product.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.like.mall.common.valid.Add;
+import com.like.mall.common.valid.Update;
 import lombok.Data;
 import org.hibernate.validator.constraints.URL;
 
@@ -10,7 +12,7 @@ import java.io.Serializable;
 
 /**
  * 品牌
- * 
+ *
  * @author like
  * @email 980650920@qq.com
  * @date 2020-10-25 11:35:49
@@ -24,17 +26,19 @@ public class BrandEntity implements Serializable {
 	 * 品牌id
 	 */
 	@TableId
+	@NotNull(message = "修改必须指定品牌id",groups = {Update.class})
+	@Null(message = "添加不能指定品牌id",groups = {Add.class})
 	private Long brandId;
 	/**
 	 * 品牌名
 	 */
-	@NotBlank(message = "品牌名必须提交")
+	@NotBlank(message = "品牌名必须提交",groups = {Add.class,Update.class})
 	private String name;
 	/**
 	 * 品牌logo地址
 	 */
 	@NotEmpty
-	@URL(message = "logo必须是一个url地址")
+	@URL(message = "logo必须是一个url地址",groups = {Add.class,Update.class})
 	private String logo;
 	/**
 	 * 介绍

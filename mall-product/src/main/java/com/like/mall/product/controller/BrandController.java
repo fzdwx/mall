@@ -54,7 +54,7 @@ public class BrandController {
      * 保存
      */
     @RequestMapping("/save")
-    public R save(@Valid @RequestBody BrandEntity brand /*,BindingResult result*/) throws Exception{
+    public R save(@Valid /*@Validated({Add.class})*/ @RequestBody BrandEntity brand /*,BindingResult result*/) throws Exception{
 //        if (result.hasErrors()) {
 //            Map<String, String> map = new HashMap<>();
 //            result
