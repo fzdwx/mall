@@ -156,6 +156,7 @@ export default {
       });
     },
     updateCatelogHandle(brandId) {
+      this.getDataList();
       this.cateRelationDialogVisible = true;
       this.brandId = brandId;
       this.getCateRelation();
