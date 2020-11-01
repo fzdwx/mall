@@ -1,6 +1,7 @@
 <template>
   <el-row :gutter="20">
     <el-col :span="6">
+<!--      菜单-->
       <category @tree-node-click="treenodeclick"></category>
     </el-col>
     <el-col :span="18">
@@ -213,5 +214,5 @@ export default {
   }
 };
 </script>
-<style scoped>
+<style scoped>
 </style>

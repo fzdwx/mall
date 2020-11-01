@@ -1,19 +1,14 @@
 package com.like.mall.product.controller;
 
-import java.util.Arrays;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.like.mall.product.entity.AttrGroupEntity;
-import com.like.mall.product.service.AttrGroupService;
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.R;
+import com.like.mall.product.entity.AttrGroupEntity;
+import com.like.mall.product.service.AttrGroupService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.Map;
 
 
 
@@ -31,13 +26,19 @@ public class AttrGroupController {
     private AttrGroupService attrGroupService;
 
     /**
-     * 列表
+     * 商品系统-平台属性-属性分组
+     * - 根据分类信息显示对应的分组信息
+     * - 默认显示所有
+     * -
      */
-    @RequestMapping("/list")
-    public R list(@RequestParam Map<String, Object> params){
-        PageUtils page = attrGroupService.queryPage(params);
-
-        return R.ok().put("page", page);
+    @RequestMapping("/list/{catelogId}")
+    public R list(@RequestParam Map<String, Object> params,
+                  @PathVariable Long catelogId) {
+        PageUtils page= /*  attrGroupService.queryPage(params);*/
+        attrGroupService.queryPage(params,catelogId);
+        return R
+                .ok()
+                .put("page", page);
     }
 
 

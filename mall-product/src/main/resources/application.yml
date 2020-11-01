@@ -27,6 +27,9 @@ mybatis-plus:
       logic-delete-value: 1 # 被删除
       logic-not-delete-value: 0 #没有被删除
   # 显示mybatis日志
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  #configuration:
+    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
+logging:
+  level:
+    com.like.mall: debug
