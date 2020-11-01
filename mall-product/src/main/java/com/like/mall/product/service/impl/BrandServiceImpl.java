@@ -11,6 +11,7 @@ import com.like.mall.product.service.BrandService;
 import com.like.mall.product.service.CategoryBrandRelationService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Map;
@@ -46,6 +47,7 @@ public class BrandServiceImpl extends ServiceImpl<BrandDao, BrandEntity> impleme
 
     // 级联更更新
     @Override
+    @Transactional
     public void updateDetail(BrandEntity brand) {
         // - 更新自己
         updateById(brand);

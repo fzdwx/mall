@@ -25,6 +25,7 @@ public class CategoryBrandRelationServiceImpl extends ServiceImpl<CategoryBrandR
     BrandDao brandDao;
     @Resource
     CategoryDao categoryDao;
+
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<CategoryBrandRelationEntity> page = this.page(
@@ -62,6 +63,7 @@ public class CategoryBrandRelationServiceImpl extends ServiceImpl<CategoryBrandR
         this.update(categoryBrandRelationEntity,query);
     }
 
+    // 级联更新
     @Override
     public void updateCategory(CategoryEntity category) {
         baseMapper.updateCategory(category.getCatId(), category.getName());
