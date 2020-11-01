@@ -4,10 +4,13 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.List;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 /**
  * 商品三级分类
@@ -63,6 +66,7 @@ public class CategoryEntity implements Serializable {
 	/**
 	 * 在表中不存在，专门用来存放子节点
 	 */
+	@JsonInclude(NON_EMPTY) // 不为空的时候才返回
 	@TableField(exist = false)
 	private List<CategoryEntity> children;
 
