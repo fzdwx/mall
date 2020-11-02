@@ -32,6 +32,7 @@ public class AttrController {
     @RequestMapping("/save")
     public R save(@RequestBody AttrVo attr){
 //        attrService.save(attr);
+        // 保存attr 和 attr group 连接表
         attrService.saveAttr(attr);
 
         return R.ok();

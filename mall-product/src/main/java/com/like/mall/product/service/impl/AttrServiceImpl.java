@@ -38,17 +38,30 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
     @Override
     @Transactional // 事务
     public void saveAttr(AttrVo attr) {
+        System.out.println("attr = " + attr);
         // 1.保存基本数据
         AttrEntity ae = new AttrEntity();
         BeanUtil.copyProperties(attr, ae);
         save(ae);
+
         // 2.保存关联关系
         AttrAttrgroupRelationEntity aarEntity = AttrAttrgroupRelationEntity
                 .builder()
                 .attrGroupId(attr.getAttrGroupId())
-                .attrId(attr.getAttrId())
+                .attrId(getByNameAndCatelogId(ae).getAttrId())
                 .build();
         aarDao.insert(aarEntity);
+    }
+
+    /**
+     * 根据name 和 catelog id 查询 attr
+     */
+    public AttrEntity getByNameAndCatelogId(AttrEntity ae) {
+        QueryWrapper<AttrEntity> query = new QueryWrapper<>();
+        query.eq("attr_name", ae.getAttrName())
+             .eq("catelog_id", ae.getCatelogId())
+             .select("attr_id");
+        return baseMapper.selectOne(query);
     }
 
 }
