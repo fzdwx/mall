@@ -1,19 +1,15 @@
 package com.like.mall.product.controller;
 
-import java.util.Arrays;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.like.mall.product.entity.AttrEntity;
-import com.like.mall.product.service.AttrService;
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.R;
+import com.like.mall.product.entity.AttrEntity;
+import com.like.mall.product.service.AttrService;
+import com.like.mall.product.vo.AttrVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.Map;
 
 
 
@@ -29,6 +25,17 @@ import com.like.mall.common.utils.R;
 public class AttrController {
     @Autowired
     private AttrService attrService;
+
+    /**
+     * 保存
+     */
+    @RequestMapping("/save")
+    public R save(@RequestBody AttrVo attr){
+//        attrService.save(attr);
+        attrService.saveAttr(attr);
+
+        return R.ok();
+    }
 
     /**
      * 列表
@@ -49,16 +56,6 @@ public class AttrController {
 		AttrEntity attr = attrService.getById(attrId);
 
         return R.ok().put("attr", attr);
-    }
-
-    /**
-     * 保存
-     */
-    @RequestMapping("/save")
-    public R save(@RequestBody AttrEntity attr){
-		attrService.save(attr);
-
-        return R.ok();
     }
 
     /**
