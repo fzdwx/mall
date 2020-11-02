@@ -9,6 +9,7 @@ import com.like.mall.product.dao.CategoryDao;
 import com.like.mall.product.entity.CategoryEntity;
 import com.like.mall.product.service.CategoryBrandRelationService;
 import com.like.mall.product.service.CategoryService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,7 +81,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         // 1.先更新自己
         updateById(category);
         // 2.更新和品牌相关的内容
-        categoryBrandRelationService.updateCategory(category);
+        if(StringUtils.isNotBlank(category.getName())) {
+            categoryBrandRelationService.updateCategory(category);
+        }
     }
 
     // 递归收集父节点

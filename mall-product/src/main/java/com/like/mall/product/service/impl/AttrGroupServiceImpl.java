@@ -21,8 +21,7 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<AttrGroupEntity> page = this.page(
                 new Query<AttrGroupEntity>().getPage(params),
-                new QueryWrapper<AttrGroupEntity>()
-        );
+                new QueryWrapper<AttrGroupEntity>());
 
         return new PageUtils(page);
     }
@@ -31,24 +30,28 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
     public PageUtils queryPage(Map<String, Object> params, Long catelogId) {
 
         IPage<AttrGroupEntity> page = null;
-        // 默认显示所有
-        if (catelogId == 0) {
-            page = page(new Query<AttrGroupEntity>().getPage(params),
-                        new QueryWrapper<AttrGroupEntity>());
-        } else {
-            // select * from pms_attr_group where catelog_id = ? and ( attr_group_id = key or attr_group_name  like "%key%"
-            String key = (String) params.get("key"); // 获取参数中的key
-            QueryWrapper<AttrGroupEntity> query = new QueryWrapper<AttrGroupEntity>().eq("catelog_id", catelogId);
-            if (StringUtils.isNotBlank(key)) {
-                query.and(o -> {
-                    o
-                            .eq("attr_group_id", key)
-                            .or()
-                            .like("attr_group_name", key);
-                });
-            }
-            page = page(new Query<AttrGroupEntity>().getPage(params), query);
+        QueryWrapper<AttrGroupEntity> query = new QueryWrapper<>();
+        String key = (String) params.get("key"); // 获取参数中的key
+        if(StringUtils.isNotBlank(key)) {
+            query.and(o -> {
+                o.eq("attr_group_id", key)
+                 .or()
+                 .like("attr_group_name", key);
+            });
         }
+        // 默认显示所有
+        //        if (catelogId == 0) {
+        //            page = page (new Query<AttrGroupEntity> ().getPage (params), new QueryWrapper<AttrGroupEntity>
+        //            ());
+        //        } else {
+        //            // select * from pms_attr_group where catelog_id = ? and ( attr_group_id = key or
+        //            attr_group_name  like "%key%"
+        //            query.eq ("catelog_id", catelogId);
+        //        }
+        if(catelogId != 0) {
+            query.eq("catelog_id", catelogId);
+        }
+        page = page(new Query<AttrGroupEntity>().getPage(params), query);
         return new PageUtils(page);
     }
 
