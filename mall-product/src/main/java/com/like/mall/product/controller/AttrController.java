@@ -4,13 +4,13 @@ import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.R;
 import com.like.mall.product.entity.AttrEntity;
 import com.like.mall.product.service.AttrService;
+import com.like.mall.product.vo.AttrRespVo;
 import com.like.mall.product.vo.AttrVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.Map;
-
 
 
 /**
@@ -27,11 +27,33 @@ public class AttrController {
     private AttrService attrService;
 
     /**
+     * 信息：数据回显
+     * - 添加显示完整的分类路径
+     * - 分组信息
+     */
+    @RequestMapping("/info/{attrId}")
+    public R info(@PathVariable("attrId") Long attrId) {
+        AttrRespVo  vo=  attrService.getAttrInfo(attrId);
+        return R.ok()
+                .put("attr", vo);
+    }
+
+    /**
+     * 查询当前分类的id
+     */
+    @GetMapping("/base/list/{catelogId}")
+    public R baseAttrList(@RequestParam Map<String, Object> params,
+                          @PathVariable("catelogId") Long catelogId) {
+        PageUtils page = attrService.queryBaseAttrPage(params, catelogId);
+        return R.ok()
+                .put("page", page);
+    }
+
+    /**
      * 保存
      */
     @RequestMapping("/save")
-    public R save(@RequestBody AttrVo attr){
-//        attrService.save(attr);
+    public R save(@RequestBody AttrVo attr) {
         // 保存attr 和 attr group 连接表
         attrService.saveAttr(attr);
 
@@ -42,29 +64,20 @@ public class AttrController {
      * 列表
      */
     @RequestMapping("/list")
-    public R list(@RequestParam Map<String, Object> params){
+    public R list(@RequestParam Map<String, Object> params) {
         PageUtils page = attrService.queryPage(params);
 
-        return R.ok().put("page", page);
+        return R.ok()
+                .put("page", page);
     }
 
-
-    /**
-     * 信息
-     */
-    @RequestMapping("/info/{attrId}")
-    public R info(@PathVariable("attrId") Long attrId){
-		AttrEntity attr = attrService.getById(attrId);
-
-        return R.ok().put("attr", attr);
-    }
 
     /**
      * 修改
      */
     @RequestMapping("/update")
-    public R update(@RequestBody AttrEntity attr){
-		attrService.updateById(attr);
+    public R update(@RequestBody AttrEntity attr) {
+        attrService.updateById(attr);
 
         return R.ok();
     }
@@ -73,8 +86,8 @@ public class AttrController {
      * 删除
      */
     @RequestMapping("/delete")
-    public R delete(@RequestBody Long[] attrIds){
-		attrService.removeByIds(Arrays.asList(attrIds));
+    public R delete(@RequestBody Long[] attrIds) {
+        attrService.removeByIds(Arrays.asList(attrIds));
 
         return R.ok();
     }
