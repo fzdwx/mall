@@ -142,6 +142,23 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         return vo;
     }
 
+    @Override
+    public void updateDetail(AttrVo attr) {
+        AttrEntity attrE = new AttrEntity();
+        BeanUtils.copyProperties(attr, attrE);
+        // 1.先更新attr
+        updateById(attrE);
+
+        // 2.修改分组关联
+        AttrAttrgroupRelationEntity relation =
+                AttrAttrgroupRelationEntity.builder()
+                                           .attrId(attr.getAttrId())
+                                           .attrGroupId(attr.getAttrGroupId())
+                                           .build();
+        aarDao.update(relation, new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", attr.getAttrId()));
+
+    }
+
     /**
      * 根据name 和 catelog id 查询 attr
      */

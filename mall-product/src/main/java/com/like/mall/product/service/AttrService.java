@@ -45,5 +45,13 @@ public interface AttrService extends IService<AttrEntity> {
      * @return {@link AttrRespVo}
      */
     AttrRespVo getAttrInfo(Long attrId);
+
+    /**
+     * 更新的属性的时候级联更新
+     * - 属性和属性组的关系
+     *
+     * @param attr attr
+     */
+    void updateDetail(AttrVo attr);
 }
 

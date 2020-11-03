@@ -27,6 +27,16 @@ public class AttrController {
     private AttrService attrService;
 
     /**
+     * 修改
+     */
+    @RequestMapping("/update")
+    public R update(@RequestBody AttrVo attr) {
+        attrService.updateDetail(attr);
+
+        return R.ok();
+    }
+
+    /**
      * 信息：数据回显
      * - 添加显示完整的分类路径
      * - 分组信息
@@ -72,15 +82,7 @@ public class AttrController {
     }
 
 
-    /**
-     * 修改
-     */
-    @RequestMapping("/update")
-    public R update(@RequestBody AttrEntity attr) {
-        attrService.updateById(attr);
 
-        return R.ok();
-    }
 
     /**
      * 删除
