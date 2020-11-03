@@ -13,6 +13,7 @@ import com.like.mall.product.entity.AttrAttrgroupRelationEntity;
 import com.like.mall.product.entity.AttrEntity;
 import com.like.mall.product.entity.AttrGroupEntity;
 import com.like.mall.product.entity.CategoryEntity;
+import com.like.mall.product.service.AttrAttrgroupRelationService;
 import com.like.mall.product.service.AttrService;
 import com.like.mall.product.service.CategoryService;
 import com.like.mall.product.vo.AttrRespVo;
@@ -33,6 +34,8 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
 
     @Resource
     AttrAttrgroupRelationDao aarDao;
+    @Resource
+    AttrAttrgroupRelationService attrAttrgroupRelationService;
     @Resource
     AttrGroupDao agDao;
     @Resource
@@ -155,8 +158,9 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
                                            .attrId(attr.getAttrId())
                                            .attrGroupId(attr.getAttrGroupId())
                                            .build();
-        aarDao.update(relation, new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", attr.getAttrId()));
-
+        // 修改，防止該屬性沒有選擇分組
+        attrAttrgroupRelationService.saveOrUpdate(relation, new QueryWrapper<AttrAttrgroupRelationEntity>().eq(
+                "attr_id", attr.getAttrId()));
     }
 
     /**
