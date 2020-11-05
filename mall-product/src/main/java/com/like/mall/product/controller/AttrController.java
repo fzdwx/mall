@@ -2,7 +2,6 @@ package com.like.mall.product.controller;
 
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.R;
-import com.like.mall.product.entity.AttrEntity;
 import com.like.mall.product.service.AttrService;
 import com.like.mall.product.vo.AttrRespVo;
 import com.like.mall.product.vo.AttrVo;
@@ -43,18 +42,19 @@ public class AttrController {
      */
     @RequestMapping("/info/{attrId}")
     public R info(@PathVariable("attrId") Long attrId) {
-        AttrRespVo  vo=  attrService.getAttrInfo(attrId);
+        AttrRespVo vo = attrService.getAttrInfo(attrId);
         return R.ok()
                 .put("attr", vo);
     }
 
     /**
-     * 查询当前分类的id
+     * 查询当前分类的属性（[0-销售属性，1-基本属性，2-既是销售属性又是基本属性]）
      */
-    @GetMapping("/base/list/{catelogId}")
+    @GetMapping("/{attrType}/list/{catelogId}")
     public R baseAttrList(@RequestParam Map<String, Object> params,
-                          @PathVariable("catelogId") Long catelogId) {
-        PageUtils page = attrService.queryBaseAttrPage(params, catelogId);
+                          @PathVariable("catelogId") Long catelogId,
+                          @PathVariable String attrType) {
+        PageUtils page = attrService.queryBaseAttrPage(params, catelogId,attrType);
         return R.ok()
                 .put("page", page);
     }
@@ -80,8 +80,6 @@ public class AttrController {
         return R.ok()
                 .put("page", page);
     }
-
-
 
 
     /**

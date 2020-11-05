@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.like.mall.common.constant.ProductConstant.AttrEnum.ATTR_TYPE_BASE;
+import static com.like.mall.common.constant.ProductConstant.AttrEnum.ATTR_TYPE_SALE;
+
 
 @Service("attrService")
 public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements AttrService {
@@ -47,8 +50,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<AttrEntity> page = this.page(
                 new Query<AttrEntity>().getPage(params),
-                new QueryWrapper<AttrEntity>()
-                                          );
+                new QueryWrapper<AttrEntity>());
 
         return new PageUtils(page);
     }
@@ -61,17 +63,21 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         BeanUtils.copyProperties(attr, ae);
         save(ae);
         // 2.保存关联关系
-        AttrAttrgroupRelationEntity aarEntity = AttrAttrgroupRelationEntity
-                .builder()
-                .attrGroupId(attr.getAttrGroupId())
-                .attrId(ae.getAttrId())
-                .build();
-        aarDao.insert(aarEntity);
+        if(attr.getAttrType() == ATTR_TYPE_BASE.getCode()) {
+            AttrAttrgroupRelationEntity aarEntity = AttrAttrgroupRelationEntity
+                    .builder()
+                    .attrGroupId(attr.getAttrGroupId())
+                    .attrId(ae.getAttrId())
+                    .build();
+            aarDao.insert(aarEntity);
+        }
     }
 
     @Override
-    public PageUtils queryBaseAttrPage(Map<String, Object> params, Long catelogId) {
-        QueryWrapper<AttrEntity> query = new QueryWrapper<>();
+    public PageUtils queryBaseAttrPage(Map<String, Object> params, Long catelogId, String attrType) {
+        QueryWrapper<AttrEntity> query = new QueryWrapper<AttrEntity>()
+                .eq("attr_type", "base".equalsIgnoreCase(
+                        attrType) ? ATTR_TYPE_BASE.getCode() : ATTR_TYPE_SALE.getCode()); // 0-销售属性，1-基本属性，2-既是销售属性又是基本属性
         // 1.组装查询条件
         if(catelogId != 0) {
             query.eq("catelog_id", catelogId);
@@ -98,11 +104,14 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
                            AttrRespVo vo = new AttrRespVo();
                            BeanUtils.copyProperties(attrEntity, vo);
                            // 3.1.获取当前attr对应的分组信息
-                           AttrAttrgroupRelationEntity aare = aarDao.selectOne(
-                                   // 查询属性分组组名和分类
-                                   new QueryWrapper<AttrAttrgroupRelationEntity>().eq(
-                                           "attr_id",
-                                           vo.getAttrId()));
+                           AttrAttrgroupRelationEntity aare = null;
+                           if("base".equalsIgnoreCase(attrType)) {
+                               aare = aarDao.selectOne(
+                                       // 查询属性分组组名和分类
+                                       new QueryWrapper<AttrAttrgroupRelationEntity>().eq(
+                                               "attr_id",
+                                               vo.getAttrId()));
+                           }
                            if(aare != null) {
                                AttrGroupEntity attrGroup = agDao.selectById(
                                        aare.getAttrGroupId());
@@ -128,15 +137,16 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         BeanUtils.copyProperties(attr, vo);
 
         // 2.获取分组信息
-        AttrAttrgroupRelationEntity attrAttrgroupRelationEntity = aarDao.selectOne(
-                new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", attrId));
-        if(attrAttrgroupRelationEntity != null) {
-            vo.setAttrGroupId(attrAttrgroupRelationEntity.getAttrGroupId());
-        }
-        assert attrAttrgroupRelationEntity != null;
-        AttrGroupEntity attrGroupEntity = agDao.selectById(attrAttrgroupRelationEntity.getAttrGroupId());
-        if(attrGroupEntity != null) {
-            vo.setGroupName(attrGroupEntity.getAttrGroupName());
+        if(attr.getAttrType() == ATTR_TYPE_BASE.getCode()) { // 如果是基本属性才需要查询属性分组信息
+            AttrAttrgroupRelationEntity attrAttrgroupRelationEntity = aarDao.selectOne(
+                    new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", attrId));
+            if(attrAttrgroupRelationEntity != null) {
+                vo.setAttrGroupId(attrAttrgroupRelationEntity.getAttrGroupId());
+                AttrGroupEntity attrGroupEntity = agDao.selectById(attrAttrgroupRelationEntity.getAttrGroupId());
+                if(attrGroupEntity != null) {
+                    vo.setGroupName(attrGroupEntity.getAttrGroupName());
+                }
+            }
         }
 
         // 3.获取分类完整路径
@@ -151,16 +161,17 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         BeanUtils.copyProperties(attr, attrE);
         // 1.先更新attr
         updateById(attrE);
-
-        // 2.修改分组关联
-        AttrAttrgroupRelationEntity relation =
-                AttrAttrgroupRelationEntity.builder()
-                                           .attrId(attr.getAttrId())
-                                           .attrGroupId(attr.getAttrGroupId())
-                                           .build();
-        // 修改，防止該屬性沒有選擇分組
-        attrAttrgroupRelationService.saveOrUpdate(relation, new QueryWrapper<AttrAttrgroupRelationEntity>().eq(
-                "attr_id", attr.getAttrId()));
+        if(attr.getAttrType() == ATTR_TYPE_BASE.getCode()) { // 如果是基本属性才需要修改属性分组信息
+            // 2.修改分组关联
+            AttrAttrgroupRelationEntity relation =
+                    AttrAttrgroupRelationEntity.builder()
+                                               .attrId(attr.getAttrId())
+                                               .attrGroupId(attr.getAttrGroupId())
+                                               .build();
+            // 修改，防止該屬性沒有選擇分組
+            attrAttrgroupRelationService.saveOrUpdate(relation, new QueryWrapper<AttrAttrgroupRelationEntity>().eq(
+                    "attr_id", attr.getAttrId()));
+        }
     }
 
     /**
