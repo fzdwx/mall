@@ -184,6 +184,9 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
                    .map(AttrAttrgroupRelationEntity::getAttrId)
                    .collect(Collectors.toList());
 
+        if (ids.isEmpty()) {  // 添加判断
+            return  null;
+        }
         return listByIds(ids);
     }
 
