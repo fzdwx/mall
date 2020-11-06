@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.Query;
-import com.like.mall.product.dao.AttrAttrgroupRelationDao;
+import com.like.mall.product.dao.AttrAttrGroupRelationDao;
 import com.like.mall.product.dao.AttrDao;
 import com.like.mall.product.dao.AttrGroupDao;
 import com.like.mall.product.dao.CategoryDao;
@@ -36,7 +36,7 @@ import static com.like.mall.common.constant.ProductConstant.AttrEnum.ATTR_TYPE_S
 public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements AttrService {
 
     @Resource
-    AttrAttrgroupRelationDao aarDao;
+    AttrAttrGroupRelationDao aarDao;
     @Resource
     AttrAttrgroupRelationService attrAttrgroupRelationService;
     @Resource
@@ -172,6 +172,19 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
             attrAttrgroupRelationService.saveOrUpdate(relation, new QueryWrapper<AttrAttrgroupRelationEntity>().eq(
                     "attr_id", attr.getAttrId()));
         }
+    }
+
+    @Override
+    public List<AttrEntity> getAttrGroupById(Long attrGroupId) {
+        List<AttrAttrgroupRelationEntity> ens = aarDao.selectList(
+                new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_group_id", attrGroupId));
+        // 收集所有id
+        List<Long> ids =
+                ens.stream()
+                   .map(AttrAttrgroupRelationEntity::getAttrId)
+                   .collect(Collectors.toList());
+
+        return listByIds(ids);
     }
 
     /**

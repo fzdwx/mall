@@ -6,6 +6,7 @@ import com.like.mall.product.entity.AttrEntity;
 import com.like.mall.product.vo.AttrRespVo;
 import com.like.mall.product.vo.AttrVo;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -54,5 +55,15 @@ public interface AttrService extends IService<AttrEntity> {
      * @param attr attr
      */
     void updateDetail(AttrVo attr);
+
+
+    /**
+     * 根据attrGroupId(基本属性)获取attr列表
+     *
+     * @param attrGroupId attr组id
+     *
+     * @return {@link List<AttrEntity>}
+     */
+    List<AttrEntity> getAttrGroupById(Long attrGroupId);
 }
 

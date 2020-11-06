@@ -2,13 +2,17 @@ package com.like.mall.product.controller;
 
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.R;
+import com.like.mall.product.entity.AttrEntity;
 import com.like.mall.product.entity.AttrGroupEntity;
 import com.like.mall.product.service.AttrGroupService;
+import com.like.mall.product.service.AttrService;
 import com.like.mall.product.service.CategoryService;
+import com.like.mall.product.vo.AttrGroupRelationVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 
@@ -26,6 +30,36 @@ public class AttrGroupController {
     private AttrGroupService attrGroupService;
     @Autowired
     private CategoryService categoryService;
+    @Autowired
+    AttrService attrService;
+
+    /**
+     * 删除属性分组和属性的关联关系
+     *
+     * @param vos 参数个数
+     *
+     * @return {@link R}
+     */
+    @PostMapping("/attr/relation/delete")
+    public R delAttrAndAttrGroupRelation(@RequestBody List<AttrGroupRelationVo> vos) {
+        Long count = attrGroupService.delAttrAndAttrGroupRelation(vos);
+        return R.ok().put("count",count);
+    }
+
+    /**
+     * 获取attrGroup所关联的属性（基本属性）
+     *
+     * @param attrGroupId attr组id
+     *
+     * @return {@link R}
+     */
+    @GetMapping("/{attrGroupId}/attr/relation")
+    public R attrRelation(@PathVariable Long attrGroupId) {
+        List<AttrEntity> attrs = attrService.getAttrGroupById(attrGroupId);
+
+        return R.ok()
+                .put("data", attrs);
+    }
 
     /**
      * 商品系统-平台属性-属性分组

@@ -5,17 +5,27 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.Query;
+import com.like.mall.product.dao.AttrAttrGroupRelationDao;
 import com.like.mall.product.dao.AttrGroupDao;
+import com.like.mall.product.entity.AttrAttrgroupRelationEntity;
 import com.like.mall.product.entity.AttrGroupEntity;
 import com.like.mall.product.service.AttrGroupService;
+import com.like.mall.product.vo.AttrGroupRelationVo;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service("attrGroupService")
 public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEntity> implements AttrGroupService {
+
+    @Resource
+    AttrAttrGroupRelationDao relationDao;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -53,6 +63,21 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
         }
         page = page(new Query<AttrGroupEntity>().getPage(params), query);
         return new PageUtils(page);
+    }
+
+    @Override
+    public Long delAttrAndAttrGroupRelation(List<AttrGroupRelationVo> vos) {
+        List<AttrAttrgroupRelationEntity> entities =
+                vos.stream()
+                   .map((vo) -> {
+                       AttrAttrgroupRelationEntity attrAttrgroupRelationEntity =
+                               AttrAttrgroupRelationEntity.builder()
+                                                          .build();
+                       BeanUtils.copyProperties(vo, attrAttrgroupRelationEntity);
+                       return attrAttrgroupRelationEntity;
+                   })
+                   .collect(Collectors.toList());
+        return relationDao.delAttrAndAttrGroupRelation(entities);
     }
 
 }
