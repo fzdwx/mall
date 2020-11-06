@@ -63,7 +63,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         BeanUtils.copyProperties(attr, ae);
         save(ae);
         // 2.保存关联关系
-        if (attr.getAttrType() == ATTR_TYPE_BASE.getCode()) {
+        if (attr.getAttrType() == ATTR_TYPE_BASE.getCode() && attr.getAttrGroupId() != null) {
             AttrAttrgroupRelationEntity aarEntity = AttrAttrgroupRelationEntity
                     .builder()
                     .attrGroupId(attr.getAttrGroupId())
@@ -99,32 +99,25 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         PageUtils pageUtils = new PageUtils(page);
         List<AttrEntity> records = page.getRecords();
         List<AttrRespVo> attrRespVoList =
-                records.stream()
-                        .map(attrEntity -> {
-                            AttrRespVo vo = new AttrRespVo();
-                            BeanUtils.copyProperties(attrEntity, vo);
-                            // 3.1.获取当前attr对应的分组信息
-                            AttrAttrgroupRelationEntity aare = null;
-                            if ("base".equalsIgnoreCase(attrType)) {
-                                aare = aarDao.selectOne(
-                                        // 查询属性分组组名和分类
-                                        new QueryWrapper<AttrAttrgroupRelationEntity>().eq(
-                                                "attr_id",
-                                                vo.getAttrId()));
-                            }
-                            if (aare != null) {
-                                AttrGroupEntity attrGroup = agDao.selectById(
-                                        aare.getAttrGroupId());
-                                vo.setGroupName(attrGroup.getAttrGroupName());
-                            }
-                            // 3.2.获取当前attr对应的分类信息
-                            CategoryEntity category = cDao.selectById(vo.getCatelogId());
-                            if (category != null) {
-                                vo.setCatelogName(category.getName());
-                            }
-                            return vo;
-                        })
-                        .collect(Collectors.toList());
+                records.stream().map(attrEntity -> {
+                    AttrRespVo vo = new AttrRespVo();
+                    BeanUtils.copyProperties(attrEntity, vo);
+                    // 3.1.获取当前attr对应的分组信息
+                    AttrAttrgroupRelationEntity aare = null;
+                    if ("base".equalsIgnoreCase(attrType)) { // 查询属性分组组名和分类
+                        aare = aarDao.selectOne(new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", vo.getAttrId()));
+                    }
+                    if (aare != null) {
+                        AttrGroupEntity attrGroup = agDao.selectById(aare.getAttrGroupId());
+                        vo.setGroupName(attrGroup.getAttrGroupName());
+                    }
+                    // 3.2.获取当前attr对应的分类信息
+                    CategoryEntity category = cDao.selectById(vo.getCatelogId());
+                    if (category != null) {
+                        vo.setCatelogName(category.getName());
+                    }
+                    return vo;
+                }).collect(Collectors.toList());
         pageUtils.setList(attrRespVoList);
         return pageUtils;
     }

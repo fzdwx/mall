@@ -3,7 +3,9 @@ package com.like.mall.product.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.product.entity.AttrAttrgroupRelationEntity;
+import com.like.mall.product.vo.AttrGroupRelationVo;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,5 +18,7 @@ import java.util.Map;
 public interface AttrAttrgroupRelationService extends IService<AttrAttrgroupRelationEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    int saveAttrAndAttrGroupRrtion(List<AttrGroupRelationVo> vos);
 }
 

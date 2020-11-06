@@ -4,6 +4,7 @@ import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.R;
 import com.like.mall.product.entity.AttrEntity;
 import com.like.mall.product.entity.AttrGroupEntity;
+import com.like.mall.product.service.AttrAttrgroupRelationService;
 import com.like.mall.product.service.AttrGroupService;
 import com.like.mall.product.service.AttrService;
 import com.like.mall.product.service.CategoryService;
@@ -31,7 +32,23 @@ public class AttrGroupController {
     @Autowired
     private CategoryService categoryService;
     @Autowired
-    AttrService attrService;
+    private AttrService attrService;
+    @Autowired
+    AttrAttrgroupRelationService attrAttrgroupRelationService;
+
+
+    /**
+     * 添加属性和属性分组关系
+     *
+     * @param vos vos
+     * @return {@link R}
+     */
+    @PostMapping("/attr/relation")
+    public R addRelation(@RequestBody List<AttrGroupRelationVo> vos) {
+        int count =  attrAttrgroupRelationService.saveAttrAndAttrGroupRrtion(vos);
+
+        return R.ok();
+    }
 
     /**
      * 删除属性分组和属性的关联关系
@@ -42,7 +59,7 @@ public class AttrGroupController {
     @PostMapping("/attr/relation/delete")
     public R delAttrAndAttrGroupRelation(@RequestBody List<AttrGroupRelationVo> vos) {
         Long count = attrGroupService.delAttrAndAttrGroupRelation(vos);
-        return R.ok().put("count",count);
+        return R.ok().put("count", count);
     }
 
     /**
