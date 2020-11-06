@@ -37,7 +37,6 @@ public class AttrGroupController {
      * 删除属性分组和属性的关联关系
      *
      * @param vos 参数个数
-     *
      * @return {@link R}
      */
     @PostMapping("/attr/relation/delete")
@@ -47,10 +46,24 @@ public class AttrGroupController {
     }
 
     /**
+     * 查询属性中
+     * 1.当前分类
+     * 2.没有被关联
+     *
+     * @param attrGroupId attr组id
+     */
+    @GetMapping("/{attrGroupId}/noattr/relation")
+    public R attrNoRelation(@RequestParam Map<String, Object> params,
+                            @PathVariable Long attrGroupId) {
+        PageUtils page = attrService.getNoRelationAttr(params, attrGroupId);
+
+        return R.ok().put("page", page);
+    }
+
+    /**
      * 获取attrGroup所关联的属性（基本属性）
      *
      * @param attrGroupId attr组id
-     *
      * @return {@link R}
      */
     @GetMapping("/{attrGroupId}/attr/relation")
