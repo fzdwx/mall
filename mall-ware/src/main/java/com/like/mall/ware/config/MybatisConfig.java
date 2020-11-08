@@ -1,4 +1,4 @@
-package com.like.mall.ware;
+package com.like.mall.ware.config;
 
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import org.mybatis.spring.annotation.MapperScan;

@@ -5,12 +5,15 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.Query;
+import com.like.mall.common.utils.R;
 import com.like.mall.ware.dao.WareSkuDao;
 import com.like.mall.ware.entity.WareSkuEntity;
+import com.like.mall.ware.feign.ProductFeignService;
 import com.like.mall.ware.service.WareSkuService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -23,12 +26,12 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
         QueryWrapper<WareSkuEntity> query = new QueryWrapper<>();
         String skuId = (String) params.get("skuId");
         if (StringUtils.isNotBlank(skuId)) {
-            query.eq("sku_id",skuId);
+            query.eq("sku_id", skuId);
 
         }
         String wareId = (String) params.get("wareId");
         if (StringUtils.isNotBlank(wareId)) {
-            query.eq("ware_id",wareId);
+            query.eq("ware_id", wareId);
 
         }
         IPage<WareSkuEntity> page = this.page(
@@ -48,11 +51,20 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             wareSku.setSkuId(skuId);
             wareSku.setStock(skuNum);
             wareSku.setWareId(wareId);
+            try {
+                R info = productFeignService.info(skuId);
+                Map<String, Object> data = (Map<String, Object>) info.get("skuInfo");
+                if (info.getCode() == 0) {
+                    wareSku.setSkuName((String) data.get("skuName"));
+                }
+            } catch (Exception e) { }
+//         todo    wareSku.setSkuName();
             save(wareSku);
         } else {
             // 2.添加
-            baseMapper.addStock(skuId,wareId,skuNum);
+            baseMapper.addStock(skuId, wareId, skuNum);
         }
     }
-
+    @Resource
+    ProductFeignService productFeignService;
 }

@@ -126,11 +126,11 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity
         List<PurchaseDetailEntity> needUpdates = new ArrayList<>();
         for (PurchaseItemDoneVo item : items) {
             PurchaseDetailEntity purchaseDetail = new PurchaseDetailEntity();
-            if (item.getStatus() == WareConstant.PurchaseDetail.hasError) {
+            if (item.getStatus() == WareConstant.PurchaseDetail.hasError) {  // 判断采购单的状态
                 flag = false;
-                purchaseDetail.setStatus(WareConstant.PurchaseDetail.hasError);
+                purchaseDetail.setStatus(WareConstant.PurchaseDetail.hasError); // 设置采购详情单的状态为失败
             } else {
-                purchaseDetail.setStatus(WareConstant.PurchaseDetail.finish);
+                purchaseDetail.setStatus(WareConstant.PurchaseDetail.finish); // 设置采购详情单的状态为成功
 
                 // 3.将成功的采购单数据入库
                 PurchaseDetailEntity purchaseDetails = purchaseDetailService.getById(item.getItemId());
