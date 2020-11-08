@@ -11,6 +11,7 @@ import com.like.mall.ware.service.WareSkuService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -36,6 +37,22 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
         );
 
         return new PageUtils(page);
+    }
+
+    @Override
+    public void addStock(Long skuId, Long wareId, Integer skuNum) {
+        // 1.新增库存
+        List<WareSkuEntity> list = this.list(new QueryWrapper<WareSkuEntity>().eq("sku_id", skuId).eq("ware_id", wareId));
+        if (list.size() == 0) {
+            WareSkuEntity wareSku = new WareSkuEntity();
+            wareSku.setSkuId(skuId);
+            wareSku.setStock(skuNum);
+            wareSku.setWareId(wareId);
+            save(wareSku);
+        } else {
+            // 2.添加
+            baseMapper.addStock(skuId,wareId,skuNum);
+        }
     }
 
 }

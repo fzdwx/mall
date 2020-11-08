@@ -5,6 +5,7 @@ import com.like.mall.common.utils.R;
 import com.like.mall.ware.entity.PurchaseEntity;
 import com.like.mall.ware.service.PurchaseService;
 import com.like.mall.ware.vo.MergeVo;
+import com.like.mall.ware.vo.PurchaseDoneVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +29,17 @@ public class PurchaseController {
     @Autowired
     private PurchaseService purchaseService;
 
+    /**
+     * 完成采购
+     *
+     * @param vos vos
+     * @return {@link R}
+     */
+    @PostMapping("/done")
+    public R finish(@RequestBody PurchaseDoneVo vos) {
+        purchaseService.done(vos);
+        return R.ok();
+    }
     /**
      * 采购员领取采购单
      *

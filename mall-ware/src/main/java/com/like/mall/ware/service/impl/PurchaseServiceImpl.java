@@ -11,11 +11,15 @@ import com.like.mall.ware.entity.PurchaseDetailEntity;
 import com.like.mall.ware.entity.PurchaseEntity;
 import com.like.mall.ware.service.PurchaseDetailService;
 import com.like.mall.ware.service.PurchaseService;
+import com.like.mall.ware.service.WareSkuService;
 import com.like.mall.ware.vo.MergeVo;
+import com.like.mall.ware.vo.PurchaseDoneVo;
+import com.like.mall.ware.vo.PurchaseItemDoneVo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -113,6 +117,43 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity
         });
     }
 
+    @Override
+    @Transactional
+    public void done(PurchaseDoneVo vos) {
+        // 1.改变采购项的状态
+        boolean flag = true;
+        List<PurchaseItemDoneVo> items = vos.getItems();
+        List<PurchaseDetailEntity> needUpdates = new ArrayList<>();
+        for (PurchaseItemDoneVo item : items) {
+            PurchaseDetailEntity purchaseDetail = new PurchaseDetailEntity();
+            if (item.getStatus() == WareConstant.PurchaseDetail.hasError) {
+                flag = false;
+                purchaseDetail.setStatus(WareConstant.PurchaseDetail.hasError);
+            } else {
+                purchaseDetail.setStatus(WareConstant.PurchaseDetail.finish);
+
+                // 3.将成功的采购单数据入库
+                PurchaseDetailEntity purchaseDetails = purchaseDetailService.getById(item.getItemId());
+                wareSkuService.addStock(purchaseDetails.getSkuId(),purchaseDetails.getWareId(),purchaseDetails.getSkuNum());
+            }
+            purchaseDetail.setId(item.getItemId());
+            needUpdates.add(purchaseDetail);
+        }
+        purchaseDetailService.updateBatchById(needUpdates);
+
+        // 2.改变采购单状态
+        Long id = vos.getId();
+        PurchaseEntity purchase = new PurchaseEntity();
+        purchase.setId(id);
+        purchase.setStatus(flag ? WareConstant.Purchase.finish:WareConstant.Purchase.hasError);
+        purchase.setUpdateTime(new Date());
+        purchaseService.updateById(purchase);
+    }
+
     @Resource
     PurchaseDetailService purchaseDetailService;
+    @Resource
+    WareSkuService wareSkuService;
+    @Resource
+    PurchaseService purchaseService;
 }
