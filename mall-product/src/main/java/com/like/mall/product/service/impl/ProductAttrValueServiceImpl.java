@@ -9,9 +9,11 @@ import com.like.mall.product.dao.ProductAttrValueDao;
 import com.like.mall.product.entity.ProductAttrValueEntity;
 import com.like.mall.product.service.ProductAttrValueService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service("productAttrValueService")
@@ -37,6 +39,18 @@ public class ProductAttrValueServiceImpl extends ServiceImpl<ProductAttrValueDao
         return list(new QueryWrapper<ProductAttrValueEntity>()
                 .eq("spu_id", spuId));
 
+    }
+
+    @Override
+    @Transactional
+    public void updateSpuBaseAttr(Long spuId, List<ProductAttrValueEntity> vos) {
+        // 1.删除以前的数据
+        remove(new QueryWrapper<ProductAttrValueEntity>().eq("spu_id",spuId));
+
+        // 2.保存
+        List<ProductAttrValueEntity> collect = vos.stream()
+                .peek(i -> i.setSpuId(spuId)).collect(Collectors.toList());
+        saveBatch(collect);
     }
 
 }

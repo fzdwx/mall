@@ -32,6 +32,22 @@ public class AttrController {
     ProductAttrValueService productAttrValueService;
 
     /**
+     * 更新spu基本属性（规格参数）
+     *
+     * @param spuId spu id
+     * @param vos   vos
+     * @return {@link R}
+     */
+    @PostMapping("/update/{spuId}")
+    public R updateSpuBaseAttr(@PathVariable Long spuId,
+                               @RequestBody List<ProductAttrValueEntity> vos) {
+        productAttrValueService.updateSpuBaseAttr(spuId,vos);
+
+        return R.ok().put("data", list);
+
+    }
+
+    /**
      * 获取spu的规格信息（基本属性）
      *
      * @param spuId spu id
@@ -39,9 +55,9 @@ public class AttrController {
      */
     @GetMapping("/base/listforspu/{spuId}")
     public R baseAttrList(@PathVariable String spuId) {
-       List<ProductAttrValueEntity> list=  productAttrValueService.baseAttrList(spuId);
+        List<ProductAttrValueEntity> list = productAttrValueService.baseAttrList(spuId);
 
-        return R.ok().put("data",list);
+        return R.ok().put("data", list);
     }
 
     /**
@@ -73,7 +89,7 @@ public class AttrController {
     public R baseAttrList(@RequestParam Map<String, Object> params,
                           @PathVariable("catelogId") Long catelogId,
                           @PathVariable String attrType) {
-        PageUtils page = attrService.queryBaseAttrPage(params, catelogId,attrType);
+        PageUtils page = attrService.queryBaseAttrPage(params, catelogId, attrType);
         return R.ok()
                 .put("page", page);
     }
