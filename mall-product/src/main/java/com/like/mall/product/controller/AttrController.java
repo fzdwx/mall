@@ -2,13 +2,17 @@ package com.like.mall.product.controller;
 
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.R;
+import com.like.mall.product.entity.ProductAttrValueEntity;
 import com.like.mall.product.service.AttrService;
+import com.like.mall.product.service.ProductAttrValueService;
 import com.like.mall.product.vo.AttrRespVo;
 import com.like.mall.product.vo.AttrVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 
@@ -24,6 +28,21 @@ import java.util.Map;
 public class AttrController {
     @Autowired
     private AttrService attrService;
+    @Resource
+    ProductAttrValueService productAttrValueService;
+
+    /**
+     * 获取spu的规格信息（基本属性）
+     *
+     * @param spuId spu id
+     * @return {@link R}
+     */
+    @GetMapping("/base/listforspu/{spuId}")
+    public R baseAttrList(@PathVariable String spuId) {
+       List<ProductAttrValueEntity> list=  productAttrValueService.baseAttrList(spuId);
+
+        return R.ok().put("data",list);
+    }
 
     /**
      * 修改
