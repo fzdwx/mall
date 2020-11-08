@@ -161,6 +161,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         queryCondition(query, params, "status", "publish_status");
         queryCondition(query, params, "branId", "brand_id");
 
+        String catalogId = (String) params.get("catalogId");
+        if ( !"0".equalsIgnoreCase(catalogId))
         queryCondition(query, params, "catelogId", "catalog_id");
 
         IPage<SpuInfoEntity> page = this.page(
