@@ -11,6 +11,7 @@ import com.like.mall.ware.service.PurchaseDetailService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -42,6 +43,12 @@ public class PurchaseDetailServiceImpl extends ServiceImpl<PurchaseDetailDao, Pu
         );
 
         return new PageUtils(page);
+    }
+
+    @Override
+    public List<PurchaseDetailEntity> updateStatusByPurchaseId(Long id) {
+
+     return   this.list( new QueryWrapper<PurchaseDetailEntity>().eq("purchase_id", id));
     }
 
 }

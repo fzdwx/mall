@@ -13,6 +13,7 @@ import com.like.mall.ware.service.PurchaseDetailService;
 import com.like.mall.ware.service.PurchaseService;
 import com.like.mall.ware.vo.MergeVo;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Date;
@@ -58,25 +59,58 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity
             this.save(purchaseEntity);
             purchaseId = purchaseEntity.getId();
         }
-        // 2.修改采购需求单的id和状态
-        List<Long> items = vo.getItems();
-        Long finalPurchaseId = purchaseId;
-        List<PurchaseDetailEntity> purchaseDetailEntities = items.stream()
-                .map(i -> {
-                    PurchaseDetailEntity purchaseDetail = new PurchaseDetailEntity();
-                    purchaseDetail.setId(i);
-                    purchaseDetail.setPurchaseId(finalPurchaseId);
-                    purchaseDetail.setStatus(WareConstant.PurchaseDetail.assigned);  // 修改采购需求单的状态为已分配
-                    return purchaseDetail;
-                }).collect(Collectors.toList());
 
-        purchaseDetailService.updateBatchById(purchaseDetailEntities);
+        PurchaseEntity purchases = getById(purchaseId);
+        if (purchases.getStatus() == WareConstant.PurchaseDetail.assigned || purchases.getStatus() == WareConstant.PurchaseDetail.create) {
+            // 2.修改采购需求单的id和状态
+            List<Long> items = vo.getItems();
+            Long finalPurchaseId = purchaseId;
+            List<PurchaseDetailEntity> purchaseDetailEntities = items.stream()
+                    .map(i -> {
+                        PurchaseDetailEntity purchaseDetail = new PurchaseDetailEntity();
+                        purchaseDetail.setId(i);
+                        purchaseDetail.setPurchaseId(finalPurchaseId);
+                        purchaseDetail.setStatus(WareConstant.PurchaseDetail.assigned);  // 修改采购需求单的状态为已分配
+                        return purchaseDetail;
+                    }).collect(Collectors.toList());
 
-        // 修改采购单的时间
-        PurchaseEntity purchase = new PurchaseEntity();
-        purchase.setId(purchaseId);
-        purchase.setUpdateTime(new Date());
-        updateById(purchase);
+            purchaseDetailService.updateBatchById(purchaseDetailEntities);
+
+            // 修改采购单的时间
+            PurchaseEntity purchase = new PurchaseEntity();
+            purchase.setId(purchaseId);
+            purchase.setUpdateTime(new Date());
+            updateById(purchase);
+        }
+
+    }
+
+    @Override
+    @Transactional
+    public void received(List<Long> ids) {
+        // 1.修改采购单的状态（刚创建或者刚分配）
+        List<PurchaseEntity> receiveList = list(new QueryWrapper<PurchaseEntity>().in("id", ids)).stream()
+                .filter(i -> i.getStatus() == WareConstant.Purchase.create || i.getStatus() == WareConstant.Purchase.assigned)
+                .peek(i -> {
+                    i.setStatus(WareConstant.Purchase.receive);
+                    i.setUpdateTime(new Date());
+                })
+                .collect(Collectors.toList());
+
+        // 2.改变采购单的状态
+        updateBatchById(receiveList);
+
+        // 3.改变采购需求单的状态
+        receiveList.forEach(i -> {
+            List<PurchaseDetailEntity> purchaseDetailEntities = purchaseDetailService.updateStatusByPurchaseId(i.getId()).stream()
+                    .map(item -> {
+                        PurchaseDetailEntity purchaseDetail = new PurchaseDetailEntity();
+                        purchaseDetail.setId(item.getId());
+                        purchaseDetail.setStatus(WareConstant.PurchaseDetail.buying); // 修改为采购中
+                        return purchaseDetail;
+                    }).collect(Collectors.toList());
+            purchaseDetailService.updateBatchById(purchaseDetailEntities);
+        });
     }
 
     @Resource
