@@ -13,6 +13,7 @@ import com.like.mall.product.entity.*;
 import com.like.mall.product.feign.CouponFeignService;
 import com.like.mall.product.service.*;
 import com.like.mall.product.vo.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -146,6 +147,37 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     @Override
     public void saveBaseSpuInfo(SpuInfoEntity spuInfo) {
         baseMapper.insert(spuInfo);
+    }
+
+    @Override
+    public PageUtils queryPageByCondition(Map<String, Object> params) {
+        QueryWrapper<SpuInfoEntity> query = new QueryWrapper<>();
+        String key = (String) params.get("key");
+        if (StringUtils.isNotBlank(key)) {
+            query.and(q -> {
+                q.eq("id", key).or().like("spu_name", key);
+            });
+        }
+        queryCondition(query, params, "status", "publish_status");
+        queryCondition(query, params, "branId", "brand_id");
+
+        queryCondition(query, params, "catelogId", "catalog_id");
+
+        IPage<SpuInfoEntity> page = this.page(
+                new Query<SpuInfoEntity>().getPage(params),
+                query
+        );
+        return new PageUtils(page);
+
+    }
+
+    public void queryCondition(QueryWrapper<SpuInfoEntity> query, Map<String, Object> params, String key, String colName) {
+        String status = (String) params.get(key);
+        if (StringUtils.isNotBlank(status)) {
+            query.and(q -> {
+                q.eq(colName, status);
+            });
+        }
     }
 
     @Resource

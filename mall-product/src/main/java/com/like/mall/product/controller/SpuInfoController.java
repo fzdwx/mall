@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.Map;
 
 
-
 /**
  * spu信息
  *
@@ -27,6 +26,16 @@ public class SpuInfoController {
     private SpuInfoService spuInfoService;
 
     /**
+     * 列表
+     */
+    @RequestMapping("/list")
+    public R list(@RequestParam Map<String, Object> params){
+        PageUtils page = spuInfoService.queryPageByCondition(params);
+
+        return R.ok().put("page", page);
+    }
+
+    /**
      * 保存
      */
     @PostMapping("/save")
@@ -36,15 +45,7 @@ public class SpuInfoController {
         return R.ok();
     }
 
-    /**
-     * 列表
-     */
-    @RequestMapping("/list")
-    public R list(@RequestParam Map<String, Object> params){
-        PageUtils page = spuInfoService.queryPage(params);
 
-        return R.ok().put("page", page);
-    }
 
 
     /**
