@@ -30,7 +30,7 @@ mybatis-plus:
       logic-not-delete-value: 0 #没有被删除
   # 显示mybatis日志
   configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
 #
 #logging:
 #  level:

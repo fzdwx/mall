@@ -22,3 +22,6 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto
+
+  configuration:
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
