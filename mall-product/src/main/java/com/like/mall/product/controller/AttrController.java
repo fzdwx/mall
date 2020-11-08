@@ -43,7 +43,7 @@ public class AttrController {
                                @RequestBody List<ProductAttrValueEntity> vos) {
         productAttrValueService.updateSpuBaseAttr(spuId,vos);
 
-        return R.ok().put("data", list);
+        return R.ok();
 
     }
 
