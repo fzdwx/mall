@@ -11,11 +11,14 @@ import com.like.mall.product.dao.CategoryDao;
 import com.like.mall.product.entity.BrandEntity;
 import com.like.mall.product.entity.CategoryBrandRelationEntity;
 import com.like.mall.product.entity.CategoryEntity;
+import com.like.mall.product.service.BrandService;
 import com.like.mall.product.service.CategoryBrandRelationService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service("categoryBrandRelationService")
@@ -25,6 +28,10 @@ public class CategoryBrandRelationServiceImpl extends ServiceImpl<CategoryBrandR
     BrandDao brandDao;
     @Resource
     CategoryDao categoryDao;
+    @Resource
+    CategoryBrandRelationService categoryBrandRelationService;
+    @Resource
+    BrandService brandService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -59,14 +66,28 @@ public class CategoryBrandRelationServiceImpl extends ServiceImpl<CategoryBrandR
                 .brandId(brandId)
                 .brandName(name)
                 .build();
-        query.eq("brand_id",brandId);
-        this.update(categoryBrandRelationEntity,query);
+        query.eq("brand_id", brandId);
+        this.update(categoryBrandRelationEntity, query);
     }
 
     // 级联更新
     @Override
     public void updateCategory(CategoryEntity category) {
         baseMapper.updateCategory(category.getCatId(), category.getName());
+    }
+
+    @Override
+    public List<BrandEntity> getBrandsByCatId(Long catId) {
+        // 1.查询出和当前分类项关联的品牌id
+        List<CategoryBrandRelationEntity> categoryBrandRelationEntities = categoryBrandRelationService
+                .list(new QueryWrapper<CategoryBrandRelationEntity>()
+                                .eq("catelog_id", catId));
+        // 2.根据上面的list选出品牌id
+        List<Long> brandIdList = categoryBrandRelationEntities.stream()
+                .map(CategoryBrandRelationEntity::getBrandId).collect(Collectors.toList());
+
+        // 3.根据brandId查找brand
+        return brandService.listByIds(brandIdList);
     }
 
 }
