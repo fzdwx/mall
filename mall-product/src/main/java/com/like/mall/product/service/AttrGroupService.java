@@ -3,6 +3,7 @@ package com.like.mall.product.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.product.entity.AttrGroupEntity;
+import com.like.mall.product.vo.AttrGroupAndAttrVo;
 import com.like.mall.product.vo.AttrGroupRelationVo;
 
 import java.util.List;
@@ -22,5 +23,7 @@ public interface AttrGroupService extends IService<AttrGroupEntity> {
     PageUtils queryPage(Map<String, Object> params, Long catelogId);
 
     Long delAttrAndAttrGroupRelation(List<AttrGroupRelationVo> vos);
+
+    List<AttrGroupAndAttrVo> getAttrGroupAndAttrByCatId(Long catelogId);
 }
 

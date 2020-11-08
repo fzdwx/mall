@@ -8,6 +8,7 @@ import com.like.mall.product.service.AttrAttrgroupRelationService;
 import com.like.mall.product.service.AttrGroupService;
 import com.like.mall.product.service.AttrService;
 import com.like.mall.product.service.CategoryService;
+import com.like.mall.product.vo.AttrGroupAndAttrVo;
 import com.like.mall.product.vo.AttrGroupRelationVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +37,12 @@ public class AttrGroupController {
     @Autowired
     AttrAttrgroupRelationService attrAttrgroupRelationService;
 
+    @GetMapping("/{catelogId}/withattr")
+    public R getAttrGroupAndAttrByCatId(@PathVariable Long catelogId) {
+        // 1.查询当前分类下所有属性分组
+        List<AttrGroupAndAttrVo> vos = attrGroupService.getAttrGroupAndAttrByCatId(catelogId);
+        return R.ok().put("data", vos);
+    }
 
     /**
      * 添加属性和属性分组关系
@@ -45,7 +52,7 @@ public class AttrGroupController {
      */
     @PostMapping("/attr/relation")
     public R addRelation(@RequestBody List<AttrGroupRelationVo> vos) {
-        int count =  attrAttrgroupRelationService.saveAttrAndAttrGroupRrtion(vos);
+        int count = attrAttrgroupRelationService.saveAttrAndAttrGroupRrtion(vos);
 
         return R.ok();
     }
