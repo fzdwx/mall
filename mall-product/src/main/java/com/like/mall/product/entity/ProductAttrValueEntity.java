@@ -2,10 +2,10 @@ package com.like.mall.product.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Builder;
+import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
-import lombok.Data;
 
 /**
  * spu属性值
@@ -16,6 +16,7 @@ import lombok.Data;
  */
 @Data
 @TableName("pms_product_attr_value")
+@Builder
 public class ProductAttrValueEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
