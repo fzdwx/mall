@@ -18,6 +18,7 @@
         <module>mall-ware</module>
         <module>mall-sys</module>
         <module>mall-party</module>
+        <module>mall-search</module>
     </modules>
 
 </project>
