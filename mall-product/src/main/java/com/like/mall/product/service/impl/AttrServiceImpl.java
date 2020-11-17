@@ -220,6 +220,11 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         return new PageUtils(page);
     }
 
+    @Override
+    public List<Long> selectSearchAttrs(List<Long> attrIdList) {
+        return this.baseMapper.selectSearchAttrs(attrIdList);
+    }
+
     /**
      * 根据name 和 catelog id 查询 attr
      */

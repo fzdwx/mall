@@ -21,10 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -179,6 +176,25 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     public void up(Long spuId) {
         List<SkuEsModel> upProduct = new ArrayList<>();
 
+        // 3.查询所有能被用来检索的规格
+        List<ProductAttrValueEntity> baseAttr = productAttrValueService.baseAttrList(String.valueOf(spuId));
+        // 收集所有属性的id
+        List<Long> attrIdList = baseAttr.stream()
+                .map(ProductAttrValueEntity::getAttrId).collect(Collectors.toList());
+        // 找到这些属性是可检索属性id
+        List<Long> searchAttrId = attrService.selectSearchAttrs(attrIdList);
+        HashSet<Long> idSet = new HashSet<>(searchAttrId);
+        // 找到这些可检索属性
+        List<SkuEsModel.Attrs> attrs = baseAttr.stream()
+                .filter(i -> idSet.contains(i.getAttrId()))
+                .map(i -> {
+                    SkuEsModel.Attrs a = new SkuEsModel.Attrs();
+                    a.setAttrId(i.getAttrId());
+                    a.setAttrName(i.getAttrName());
+                    a.setAttrValue(i.getAttrValue());
+                    return a;
+                }).collect(Collectors.toList());
+
         // 组装需要的数据
         // 1.查出当前spuId对应的所有sku信息以及品牌
         List<SkuInfoEntity> skuInfos = skuInfoService.getSkuBySpuId(spuId);
@@ -190,7 +206,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                     esModels.setSkuPrice(sku.getPrice());
                     esModels.setSkuImg(sku.getSkuDefaultImg());
                     // TODO 1: 2020/11/17 发送远程调用，查询是否有库存
-                    esModels.setHasStock(false);
+                    esModels.setHasStock(true);
                     // TODO 2: 2020/11/17 热度
                     esModels.setHotScore(0L);
                     // 设置品牌相关信息
@@ -200,7 +216,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                     // 设置分类相关的信息
                     CategoryEntity categoryInfo = categoryService.getById(esModels.getCatalogId());
                     esModels.setCatalogName(categoryInfo.getName());
-                    // TODO 3: 2020/11/17 查询所有能被用来检索的规格属性
+                    // 设置属性
+                    esModels.setAttrs(attrs);
                     return esModels;
                 }).collect(Collectors.toList());
 
