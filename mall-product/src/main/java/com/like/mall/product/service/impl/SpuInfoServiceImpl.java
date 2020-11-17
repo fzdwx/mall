@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.like.mall.common.To.SkuReductionTo;
+import com.like.mall.common.To.SkuStockVo;
 import com.like.mall.common.To.SpuBoundTo;
 import com.like.mall.common.To.es.SkuEsModel;
 import com.like.mall.common.utils.PageUtils;
@@ -12,6 +13,7 @@ import com.like.mall.common.utils.R;
 import com.like.mall.product.dao.SpuInfoDao;
 import com.like.mall.product.entity.*;
 import com.like.mall.product.feign.CouponFeignService;
+import com.like.mall.product.feign.WareFeignService;
 import com.like.mall.product.service.*;
 import com.like.mall.product.vo.*;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -174,9 +179,11 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     @Override
     public void up(Long spuId) {
-        List<SkuEsModel> upProduct = new ArrayList<>();
+        // 组装需要的数据
+        // 1.查出当前spuId对应的所有sku信息以及品牌
+        List<SkuInfoEntity> skuInfos = skuInfoService.getSkuBySpuId(spuId);
 
-        // 3.查询所有能被用来检索的规格
+        // 2.查询所有能被用来检索的属性
         List<ProductAttrValueEntity> baseAttr = productAttrValueService.baseAttrList(String.valueOf(spuId));
         // 收集所有属性的id
         List<Long> attrIdList = baseAttr.stream()
@@ -195,18 +202,32 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                     return a;
                 }).collect(Collectors.toList());
 
-        // 组装需要的数据
-        // 1.查出当前spuId对应的所有sku信息以及品牌
-        List<SkuInfoEntity> skuInfos = skuInfoService.getSkuBySpuId(spuId);
-        // 2.将skuInfo封装成skuEsModel
+        // 3.发送远程调用，查询是否有库存
+        Map<Long, Boolean> stockMap = null;
+        try {
+            R hasStock = wareFeignService.skuHasStock(skuInfos.stream().map(SkuInfoEntity::getSkuId).collect(Collectors.toList()));
+            List<SkuStockVo> data = (List<SkuStockVo>) hasStock.get("data");
+            stockMap = data.stream()
+                    .collect(Collectors.toMap(SkuStockVo::getSkuId, SkuStockVo::getHasStock));
+
+        } catch (Exception e) {
+            log.error("库存服务查询异常：原因{}" + e.getCause());
+        }
+
+        // 4.将skuInfo封装成skuEsModel
+        Map<Long, Boolean> finalStockMap = stockMap;
         List<SkuEsModel> esDataSkuEsModels = skuInfos.stream()
                 .map(sku -> {
                     SkuEsModel esModels = new SkuEsModel();
                     BeanUtils.copyProperties(sku, esModels);
                     esModels.setSkuPrice(sku.getPrice());
                     esModels.setSkuImg(sku.getSkuDefaultImg());
-                    // TODO 1: 2020/11/17 发送远程调用，查询是否有库存
-                    esModels.setHasStock(true);
+                    // 设置是否有销量
+                    if (finalStockMap != null) {
+                        esModels.setHasStock(finalStockMap.get(sku.getSkuId()));
+                    } else {
+                        esModels.setHasStock(true);
+                    }
                     // TODO 2: 2020/11/17 热度
                     esModels.setHotScore(0L);
                     // 设置品牌相关信息
@@ -245,6 +266,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     @Resource
     CouponFeignService couponFeignService;
+    @Resource
+    WareFeignService wareFeignService;
 
     public void queryCondition(QueryWrapper<SpuInfoEntity> query, Map<String, Object> params, String key, String colName) {
         String status = (String) params.get(key);

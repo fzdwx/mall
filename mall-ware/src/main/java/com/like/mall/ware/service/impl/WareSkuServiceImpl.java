@@ -10,12 +10,14 @@ import com.like.mall.ware.dao.WareSkuDao;
 import com.like.mall.ware.entity.WareSkuEntity;
 import com.like.mall.ware.feign.ProductFeignService;
 import com.like.mall.ware.service.WareSkuService;
+import com.like.mall.ware.vo.SkuStockVo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service("wareSkuService")
@@ -57,7 +59,8 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
                 if (info.getCode() == 0) {
                     wareSku.setSkuName((String) data.get("skuName"));
                 }
-            } catch (Exception e) { }
+            } catch (Exception e) {
+            }
 //         todo    wareSku.setSkuName();
             save(wareSku);
         } else {
@@ -65,6 +68,19 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             baseMapper.addStock(skuId, wareId, skuNum);
         }
     }
+
+    @Override
+    public List<SkuStockVo> skuHasStock(List<Long> skuIds) {
+       return skuIds.stream()
+                .map(i -> {
+                    SkuStockVo skuStockVo = new SkuStockVo();
+                    long count = this.baseMapper.getSkuStock(i);
+                    skuStockVo.setSkuId(i);
+                    skuStockVo.setHasStock(count > 0);
+                    return skuStockVo;
+                }).collect(Collectors.toList());
+    }
+
     @Resource
     ProductFeignService productFeignService;
 }
