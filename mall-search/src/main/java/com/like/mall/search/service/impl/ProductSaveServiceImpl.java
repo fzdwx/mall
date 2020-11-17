@@ -44,10 +44,8 @@ public class ProductSaveServiceImpl implements ProductSaveService {
         try {
             BulkResponse bulk = esClient.bulk(bulkRequest, ESConfig.COMMON_OPTIONS);
             hasFailures = bulk.hasFailures();
-            if (!hasFailures) {
-                List<String> ids = Arrays.stream(bulk.getItems()).map(BulkItemResponse::getId).collect(Collectors.toList());
-                log.error("商品上架失败：id{}", ids);
-            }
+            List<String> ids = Arrays.stream(bulk.getItems()).map(BulkItemResponse::getId).collect(Collectors.toList());
+            log.info("商品上" + (hasFailures ? EsConstant.failure : EsConstant.success) + "：id{}", ids);
         } catch (IOException e) {
             log.error("es存储异常：原因{}", e.getMessage());
         }

@@ -74,9 +74,9 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
        return skuIds.stream()
                 .map(i -> {
                     SkuStockVo skuStockVo = new SkuStockVo();
-                    long count = this.baseMapper.getSkuStock(i);
+                    Long count = this.baseMapper.getSkuStock(i);
                     skuStockVo.setSkuId(i);
-                    skuStockVo.setHasStock(count > 0);
+                    skuStockVo.setHasStock(count != null && count > 0);
                     return skuStockVo;
                 }).collect(Collectors.toList());
     }
