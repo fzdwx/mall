@@ -36,4 +36,12 @@ public class ProductConstant {
             this.meg = meg;
         }
     }
+
+
+    /** 商品新建*/
+    public static final Integer NEW = 0;
+    /** 商品上架*/
+    public static final Integer UP = 1;
+    /** 商品下架*/
+    public static final Integer DOWN = 2;
 }

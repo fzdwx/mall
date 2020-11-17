@@ -7,12 +7,14 @@ import com.like.mall.common.To.SkuReductionTo;
 import com.like.mall.common.To.SkuStockVo;
 import com.like.mall.common.To.SpuBoundTo;
 import com.like.mall.common.To.es.SkuEsModel;
+import com.like.mall.common.constant.ProductConstant;
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.Query;
 import com.like.mall.common.utils.R;
 import com.like.mall.product.dao.SpuInfoDao;
 import com.like.mall.product.entity.*;
 import com.like.mall.product.feign.CouponFeignService;
+import com.like.mall.product.feign.EsFeignService;
 import com.like.mall.product.feign.WareFeignService;
 import com.like.mall.product.service.*;
 import com.like.mall.product.vo.*;
@@ -178,7 +180,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     }
 
     @Override
-    public void up(Long spuId) {
+    public boolean up(Long spuId) {
         // 组装需要的数据
         // 1.查出当前spuId对应的所有sku信息以及品牌
         List<SkuInfoEntity> skuInfos = skuInfoService.getSkuBySpuId(spuId);
@@ -209,7 +211,6 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             List<SkuStockVo> data = (List<SkuStockVo>) hasStock.get("data");
             stockMap = data.stream()
                     .collect(Collectors.toMap(SkuStockVo::getSkuId, SkuStockVo::getHasStock));
-
         } catch (Exception e) {
             log.error("库存服务查询异常：原因{}", e.getCause());
         }
@@ -242,7 +243,26 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                     return esModels;
                 }).collect(Collectors.toList());
 
-        // TODO 5: 2020/11/17 保存到es
+        //  5: 保存到es-上架
+        R esSave = null;
+        boolean flag = false;
+        try {
+            esSave = esFeignService.productStatusUp(esDataSkuEsModels);
+            if (esSave != null) {
+                flag = (boolean) esSave.get("hasFailures");
+            }
+        } catch (Exception e) {
+            log.error("es服务保存异常：原因{}", e.getCause());
+        }
+
+        if (flag) {
+            // 上架成功，修改spu的状态
+            this.baseMapper.updateSpuStatus(spuId, ProductConstant.NEW);
+        } else {
+            // 调用失败
+            // TODO: 2020/11/17 重复调用，接口幂等性
+        } 
+        return flag;
     }
 
     @Resource
@@ -268,6 +288,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     CouponFeignService couponFeignService;
     @Resource
     WareFeignService wareFeignService;
+    @Resource
+    EsFeignService esFeignService;
 
     public void queryCondition(QueryWrapper<SpuInfoEntity> query, Map<String, Object> params, String key, String colName) {
         String status = (String) params.get(key);
