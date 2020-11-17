@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.like.mall.common.To.SkuReductionTo;
 import com.like.mall.common.To.SpuBoundTo;
+import com.like.mall.common.To.es.SkuEsModel;
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.Query;
 import com.like.mall.common.utils.R;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -162,8 +164,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         queryCondition(query, params, "branId", "brand_id");
 
         String catalogId = (String) params.get("catalogId");
-        if ( !"0".equalsIgnoreCase(catalogId))
-        queryCondition(query, params, "catelogId", "catalog_id");
+        if (!"0".equalsIgnoreCase(catalogId))
+            queryCondition(query, params, "catelogId", "catalog_id");
 
         IPage<SpuInfoEntity> page = this.page(
                 new Query<SpuInfoEntity>().getPage(params),
@@ -173,13 +175,36 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     }
 
-    public void queryCondition(QueryWrapper<SpuInfoEntity> query, Map<String, Object> params, String key, String colName) {
-        String status = (String) params.get(key);
-        if (StringUtils.isNotBlank(status)) {
-            query.and(q -> {
-                q.eq(colName, status);
-            });
-        }
+    @Override
+    public void up(Long spuId) {
+        List<SkuEsModel> upProduct = new ArrayList<>();
+
+        // 组装需要的数据
+        // 1.查出当前spuId对应的所有sku信息以及品牌
+        List<SkuInfoEntity> skuInfos = skuInfoService.getSkuBySpuId(spuId);
+        // 2.将skuInfo封装成skuEsModel
+        List<SkuEsModel> esDataSkuEsModels = skuInfos.stream()
+                .map(sku -> {
+                    SkuEsModel esModels = new SkuEsModel();
+                    BeanUtils.copyProperties(sku, esModels);
+                    esModels.setSkuPrice(sku.getPrice());
+                    esModels.setSkuImg(sku.getSkuDefaultImg());
+                    // TODO 1: 2020/11/17 发送远程调用，查询是否有库存
+                    esModels.setHasStock(false);
+                    // TODO 2: 2020/11/17 热度
+                    esModels.setHotScore(0L);
+                    // 设置品牌相关信息
+                    BrandEntity brandInfo = brandService.getById(esModels.getBrandId());
+                    esModels.setBrandName(brandInfo.getName());
+                    esModels.setBrandImg(brandInfo.getLogo());
+                    // 设置分类相关的信息
+                    CategoryEntity categoryInfo = categoryService.getById(esModels.getCatalogId());
+                    esModels.setCatalogName(categoryInfo.getName());
+                    // TODO 3: 2020/11/17 查询所有能被用来检索的规格属性
+                    return esModels;
+                }).collect(Collectors.toList());
+
+        // TODO 5: 2020/11/17 保存到es
     }
 
     @Resource
@@ -196,7 +221,20 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     SkuImagesService skuImagesService;
     @Resource
     SkuSaleAttrValueService skuSaleAttrValueService;
+    @Resource
+    BrandService brandService;
+    @Resource
+    CategoryService categoryService;
 
     @Resource
     CouponFeignService couponFeignService;
+
+    public void queryCondition(QueryWrapper<SpuInfoEntity> query, Map<String, Object> params, String key, String colName) {
+        String status = (String) params.get(key);
+        if (StringUtils.isNotBlank(status)) {
+            query.and(q -> {
+                q.eq(colName, status);
+            });
+        }
+    }
 }
