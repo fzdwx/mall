@@ -12,7 +12,7 @@ import java.util.List;
  */
 @Data
 public class SkuEsModel {
-
+    private Long skuId;
     private Long spuId;
     private String skuTitle;
     private BigDecimal skuPrice;

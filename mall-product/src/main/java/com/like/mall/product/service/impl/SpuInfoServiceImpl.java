@@ -211,7 +211,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                     .collect(Collectors.toMap(SkuStockVo::getSkuId, SkuStockVo::getHasStock));
 
         } catch (Exception e) {
-            log.error("库存服务查询异常：原因{}" + e.getCause());
+            log.error("库存服务查询异常：原因{}", e.getCause());
         }
 
         // 4.将skuInfo封装成skuEsModel
