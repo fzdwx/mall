@@ -254,14 +254,14 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             log.error("es服务保存异常：原因{}", e);
         }
 
-        if (flag) {
+        if (!flag) {
             // 上架成功，修改spu的状态
             this.baseMapper.updateSpuStatus(spuId, ProductConstant.NEW);
         } else {
             // 调用失败
             // TODO: 2020/11/17 重复调用，接口幂等性
         } 
-        return flag;
+        return !flag;
     }
 
     @Resource
