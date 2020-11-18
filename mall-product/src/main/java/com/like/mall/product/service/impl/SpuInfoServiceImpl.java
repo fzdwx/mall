@@ -256,7 +256,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
         if (!flag) {
             // 上架成功，修改spu的状态
-            this.baseMapper.updateSpuStatus(spuId, ProductConstant.NEW);
+            this.baseMapper.updateSpuStatus(spuId, ProductConstant.UP);
         } else {
             // 调用失败
             // TODO: 2020/11/17 重复调用，接口幂等性
