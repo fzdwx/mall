@@ -207,12 +207,11 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         // 3.发送远程调用，查询是否有库存
         Map<Long, Boolean> stockMap = null;
         try {
-            R hasStock = wareFeignService.skuHasStock(skuInfos.stream().map(SkuInfoEntity::getSkuId).collect(Collectors.toList()));
-            List<SkuStockVo> data = (List<SkuStockVo>) hasStock.get("data");
+            List<SkuStockVo> data = wareFeignService.skuHasStock(skuInfos.stream().map(SkuInfoEntity::getSkuId).collect(Collectors.toList()));
             stockMap = data.stream()
                     .collect(Collectors.toMap(SkuStockVo::getSkuId, SkuStockVo::getHasStock));
         } catch (Exception e) {
-            log.error("库存服务查询异常：原因{}", e.getCause());
+            log.error("库存服务查询异常：原因{}", e);
         }
 
         // 4.将skuInfo封装成skuEsModel
@@ -252,7 +251,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                 flag = (boolean) esSave.get("hasFailures");
             }
         } catch (Exception e) {
-            log.error("es服务保存异常：原因{}", e.getCause());
+            log.error("es服务保存异常：原因{}", e);
         }
 
         if (flag) {
