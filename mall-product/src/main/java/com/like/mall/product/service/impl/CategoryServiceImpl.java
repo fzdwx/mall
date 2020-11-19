@@ -86,6 +86,11 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         }
     }
 
+    @Override
+    public List<CategoryEntity> getLevelFirstCategory() {
+       return baseMapper.getLevelFirstCategory();
+    }
+
     // 递归收集父节点
     private List<Long> findParentPaths(Long catelogId, List<Long> paths) {
         // 1.收集当前节点id

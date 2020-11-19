@@ -16,5 +16,10 @@
         <result property="productCount" column="product_count"/>
     </resultMap>
 
+    <select id="getLevelFirstCategory" resultType="com.like.mall.product.entity.CategoryEntity">
+        select * from `mall-product`.pms_category
+        where parent_cid = 0;
+    </select>
+
 
 </mapper>
