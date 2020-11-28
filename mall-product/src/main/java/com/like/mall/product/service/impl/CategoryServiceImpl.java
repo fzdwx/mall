@@ -93,15 +93,16 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     @Override
     public Map<String, List<Catelog2Vo>> getCatalogJson() {
+
+        List<CategoryEntity> allCategory = baseMapper.selectList(null);
         // 1.找出所有的一级分类
-        List<CategoryEntity> level1 = getLevelFirstCategory();
+        List<CategoryEntity> level1 = getParent_cid(allCategory, 0L);
 
         // 2.封装数据
         return level1.stream()
                 .collect(Collectors.toMap(k -> k.getCatId().toString(), v -> {
                     // 3.查找当前一级分类下的二级分类
-                    List<CategoryEntity> level2 = baseMapper.selectList(new QueryWrapper<CategoryEntity>()
-                            .eq("parent_cid", v.getCatId()));
+                    List<CategoryEntity> level2 = getParent_cid(allCategory, v.getCatId());
 
                     // 4.封装二级分类vo
                     List<Catelog2Vo> vo2s = new ArrayList<>();
@@ -114,8 +115,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
                                     Vo2.setName(i2.getName());
 
                                     // 5.寻找三级分类
-                                    List<CategoryEntity> level3 = baseMapper.selectList(new QueryWrapper<CategoryEntity>()
-                                            .eq("parent_cid", i2.getCatId()));
+                                    List<CategoryEntity> level3 = getParent_cid(allCategory, i2.getCatId());
 
                                     // 6.封装三级级分类vo
                                     List<Catelog2Vo.Catelog3Vo> vo3s = null;
@@ -129,12 +129,15 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
                                         }).collect(Collectors.toList());
                                     }
                                     Vo2.setCatalog3List(vo3s);
-
                                     return Vo2;
                                 }).collect(Collectors.toList());
                     }
                     return vo2s;
                 }));
+    }
+
+    public List<CategoryEntity> getParent_cid(List<CategoryEntity> allCategory, Long pCid) {
+        return allCategory.stream().filter(i -> i.getParentCid().equals(pCid)).collect(Collectors.toList());
     }
 
     // 递归收集父节点
