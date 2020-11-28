@@ -105,32 +105,31 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
                     List<CategoryEntity> level2 = getParent_cid(allCategory, v.getCatId());
 
                     // 4.封装二级分类vo
-                    List<Catelog2Vo> vo2s = new ArrayList<>();
+                    List<Catelog2Vo> vo2s = null;
                     if (level2 != null) {
-                        vo2s = level2.stream()
-                                .map(i2 -> {
-                                    Catelog2Vo Vo2 = new Catelog2Vo();
-                                    Vo2.setCatalogId(String.valueOf(v.getCatId()));
-                                    Vo2.setId(i2.getCatId().toString());
-                                    Vo2.setName(i2.getName());
+                        vo2s = level2.stream().map(i2 -> {
+                            Catelog2Vo Vo2 = new Catelog2Vo();
+                            Vo2.setCatalogId(String.valueOf(v.getCatId()));
+                            Vo2.setId(i2.getCatId().toString());
+                            Vo2.setName(i2.getName());
 
-                                    // 5.寻找三级分类
-                                    List<CategoryEntity> level3 = getParent_cid(allCategory, i2.getCatId());
+                            // 5.寻找三级分类
+                            List<CategoryEntity> level3 = getParent_cid(allCategory, i2.getCatId());
 
-                                    // 6.封装三级级分类vo
-                                    List<Catelog2Vo.Catelog3Vo> vo3s = null;
-                                    if (level3 != null) {
-                                        vo3s = level3.stream().map(i3 -> {
-                                            Catelog2Vo.Catelog3Vo Vo3 = new Catelog2Vo.Catelog3Vo();
-                                            Vo3.setCatalog2Id(i3.getParentCid().toString());
-                                            Vo3.setId(i3.getCatId().toString());
-                                            Vo3.setName(i3.getName());
-                                            return Vo3;
-                                        }).collect(Collectors.toList());
-                                    }
-                                    Vo2.setCatalog3List(vo3s);
-                                    return Vo2;
+                            // 6.封装三级级分类vo
+                            List<Catelog2Vo.Catelog3Vo> vo3s = null;
+                            if (level3 != null) {
+                                vo3s = level3.stream().map(i3 -> {
+                                    Catelog2Vo.Catelog3Vo Vo3 = new Catelog2Vo.Catelog3Vo();
+                                    Vo3.setCatalog2Id(i3.getParentCid().toString());
+                                    Vo3.setId(i3.getCatId().toString());
+                                    Vo3.setName(i3.getName());
+                                    return Vo3;
                                 }).collect(Collectors.toList());
+                            }
+                            Vo2.setCatalog3List(vo3s);
+                            return Vo2;
+                        }).collect(Collectors.toList());
                     }
                     return vo2s;
                 }));
