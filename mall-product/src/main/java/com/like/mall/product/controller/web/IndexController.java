@@ -30,6 +30,11 @@ public class IndexController {
         return "index";
     }
 
+    /**
+     * 获取所有二级和三级分类的json数据
+     *
+     * @return {@link Map<String, List<Catelog2Vo>>}
+     */
     @ResponseBody
     @GetMapping("/index/catalog.json")
     public Map<String, List<Catelog2Vo>> getCatalogJson() {
