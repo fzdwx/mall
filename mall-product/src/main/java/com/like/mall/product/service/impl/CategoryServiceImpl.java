@@ -15,10 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -45,11 +42,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return entities
                 .stream()
                 .filter(c -> c.getParentCid() == 0)   // 查询到所有的一级分类，parent id = 0
-                .map(c -> {
+                .peek(c -> {
                     c.setChildren(getChildren(c, entities)); // 查找当前标签的子标签
-                    return c;
                 })
-                .sorted((c1, c2) -> (c1.getSort() == null ? 0 : c1.getSort()) - (c2.getSort() == null ? 0 : c2.getSort())) // 排序
+                .sorted(Comparator.comparingInt(c -> (c.getSort() == null ? 0 : c.getSort()))) // 排序
                 .collect(Collectors.toList()); // 收集
 
     }
