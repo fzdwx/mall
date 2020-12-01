@@ -109,14 +109,14 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
          * 3.加锁，缓存击穿
          */
         String catalogJson = redisTemplate.opsForValue().get("catalogJson");
-        // 缓存中没有数据
-        if (StringUtils.isBlank(catalogJson)) {
-            // 1. 从数据库中查
-            return getCatalogJsonFromDb();
+        // 缓存中有数据
+        if (StringUtils.isNotBlank(catalogJson)) {
+            log.info("使用缓存");
+            return JSON.parseObject(catalogJson, new TypeReference<Map<String, List<Catelog2Vo>>>() {
+            });
         }
-        log.info("使用缓存");
-        return JSON.parseObject(catalogJson, new TypeReference<Map<String, List<Catelog2Vo>>>() {
-        });
+        // 1. 缓存中没有数据：从数据库中查
+        return getCatalogJsonFromDb();
     }
 
     /**
@@ -125,13 +125,15 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
      * @return {@link Map<String, List<Catelog2Vo>>}
      */
     public synchronized Map<String, List<Catelog2Vo>> getCatalogJsonFromDb() {
-
         // 再次判断缓存中是否有该json
         String catalogJson = redisTemplate.opsForValue().get("catalogJson");
         if (StringUtils.isNotBlank(catalogJson)) {
+            log.info("使用缓存");
             return JSON.parseObject(catalogJson, new TypeReference<Map<String, List<Catelog2Vo>>>() {
             });
         }
+
+        // 查询数据库
         log.error("缓存读取数据库");
         List<CategoryEntity> allCategory = baseMapper.selectList(null);
         // 1.找出所有的一级分类
@@ -144,7 +146,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
                     List<CategoryEntity> level2 = getParent_cid(allCategory, v.getCatId());
 
                     // 4.封装二级分类vo
-                    List<Catelog2Vo> vo2s = null;
+                    List<Catelog2Vo> vo2s = new ArrayList<>();
                     if (level2 != null) {
                         vo2s = level2.stream().map(i2 -> {
                             Catelog2Vo Vo2 = new Catelog2Vo();
@@ -172,9 +174,11 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
                     }
                     return vo2s;
                 }));
+
         catalogJson = JSON.toJSONString(data);
         // 2.放入redis缓存中
         redisTemplate.opsForValue().set("catalogJson", catalogJson, 1000 + new Random().nextInt(100), TimeUnit.SECONDS);
+
         return data;
     }
 
