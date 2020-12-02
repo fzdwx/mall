@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -116,16 +117,54 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
             });
         }
         // 1. 缓存中没有数据：从数据库中查
-        return getCatalogJsonFromDb();
+        return getCatalogJsonFromDbWithRedisLock();
     }
 
     /**
+     * 使用分布式锁-redis的setnx
      * 从数据库中查询商品分类的信息
      *
      * @return {@link Map<String, List<Catelog2Vo>>}
      */
-    public synchronized Map<String, List<Catelog2Vo>> getCatalogJsonFromDb() {
+    public Map<String, List<Catelog2Vo>> getCatalogJsonFromDbWithRedisLock() {
+        String value = UUID.randomUUID().toString();
+        // 1.分布式锁，去redis中占坑并设置过期时间 setnxex
+        Boolean hasLock = redisTemplate.opsForValue().setIfAbsent("catalogJsonLock", value, 300, TimeUnit.SECONDS);
+        // 2.判断是否加锁成功
+        if (hasLock) {
+            // 2.1.1 成功 抢到锁,读取数据库，写入redis
+            try {
+                return getDataFromDb();
+            } finally {
+                // 2.1.2 解锁 如果是当前线程放入的就删除 获取值对比+对比成功删除 = 原子操作  使用lua脚本解锁
+                String script =
+                        "if redis.call(\"get\",KEYS[1]) == ARGV[1] then\n" + "return redis.call(\"del\",KEYS[1])\n" + "else\n" + "return 0\n" + "end";
+                redisTemplate.execute(new DefaultRedisScript<>(script, Long.class), Arrays.asList("catalogJsonLock", value));
+            }
+        } else {
+            // 2.2.1失败 自旋 在次从redis中读取catalogJson
+            try {
+                TimeUnit.SECONDS.sleep(100);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return getCatalogJsonFromDbWithRedisLock();
+        }
+    }
+
+    /**
+     * 使用本地锁
+     * 从数据库中查询商品分类的信息
+     *
+     * @return {@link Map<String, List<Catelog2Vo>>}
+     */
+    public synchronized Map<String, List<Catelog2Vo>> getCatalogJsonFromDbWithLocalLock() {
         // 再次判断缓存中是否有该json
+        return getDataFromDb();
+    }
+
+    public Map<String, List<Catelog2Vo>> getDataFromDb() {
+        // 判断缓存中是否有该json
         String catalogJson = redisTemplate.opsForValue().get("catalogJson");
         if (StringUtils.isNotBlank(catalogJson)) {
             log.info("使用缓存");
