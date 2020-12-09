@@ -14,6 +14,8 @@ import com.like.mall.product.service.CategoryService;
 import com.like.mall.product.vo.Catelog2Vo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -33,6 +35,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     private CategoryBrandRelationService categoryBrandRelationService;
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private RedissonClient redisson;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -117,7 +121,26 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
             });
         }
         // 1. 缓存中没有数据：从数据库中查
-        return getCatalogJsonFromDbWithRedisLock();
+        return getCatalogJsonFromDbWithRedissonLock();
+    }
+
+    /**
+     * redisson锁
+     * 出现问题：缓存一致性
+     * 1.双写模式
+     * 2.失效模式
+     * @return {@link Map<String, List<Catelog2Vo>>}
+     */
+    public Map<String, List<Catelog2Vo>> getCatalogJsonFromDbWithRedissonLock() {
+        // 使用分布式锁
+        RLock lock = redisson.getLock("catalogJsonLock");
+        lock.lock();
+        try {
+            return getDataFromDb();
+        } finally {
+            lock.unlock();
+        }
+
     }
 
     /**
