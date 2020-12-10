@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
@@ -96,7 +97,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     }
 
     @Override
+    @Cacheable(value = {"category"},key = "#root.method.name",sync = true)  // 指定放到哪个缓存【缓存的分区】
     public List<CategoryEntity> getLevelFirstCategory() {
+        System.out.println("getLevelFirstCategory被调用，没有读取缓存");
         return baseMapper.getLevelFirstCategory();
     }
 

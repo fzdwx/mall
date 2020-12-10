@@ -23,6 +23,12 @@ spring:
   redis:
     host: 47.112.150.204
     port: 6379
+  # 缓存类型
+  cache:
+    type: redis
+    redis:
+      # ttl:
+      time-to-live: 3600000
 
 # mybatis设置
 mybatis-plus:
