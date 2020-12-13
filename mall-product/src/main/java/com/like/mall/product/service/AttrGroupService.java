@@ -5,6 +5,8 @@ import com.like.mall.common.utils.PageUtils;
 import com.like.mall.product.entity.AttrGroupEntity;
 import com.like.mall.product.vo.AttrGroupAndAttrVo;
 import com.like.mall.product.vo.AttrGroupRelationVo;
+import com.like.mall.product.vo.SpuItemAttrGroupVo;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
@@ -25,5 +27,7 @@ public interface AttrGroupService extends IService<AttrGroupEntity> {
     Long delAttrAndAttrGroupRelation(List<AttrGroupRelationVo> vos);
 
     List<AttrGroupAndAttrVo> getAttrGroupAndAttrByCatId(Long catelogId);
+
+    List<SpuItemAttrGroupVo> getBySpuId(@Param("spuId") Long spuId, Long catalogId);
 }
 

@@ -14,6 +14,7 @@ import com.like.mall.product.service.AttrGroupService;
 import com.like.mall.product.service.AttrService;
 import com.like.mall.product.vo.AttrGroupAndAttrVo;
 import com.like.mall.product.vo.AttrGroupRelationVo;
+import com.like.mall.product.vo.SpuItemAttrGroupVo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -108,6 +109,12 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
                     return vo;
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SpuItemAttrGroupVo> getBySpuId(Long spuId, Long catalogId) {
+        // 1.查出当前spu对应的所有属性分组信息以及当前分组下的所有属性对应的值
+        return  baseMapper.getBySpuId(spuId,catalogId);
     }
 
 }

@@ -47,3 +47,8 @@ mybatis-plus:
 #logging:
 #  level:
 #    com.like.mall: debug
+thread:
+  pool:
+    core-size: 20
+    max-size: 200
+    keep-alive: 10

@@ -6,14 +6,23 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.Query;
 import com.like.mall.product.dao.SkuInfoDao;
+import com.like.mall.product.entity.SkuImagesEntity;
 import com.like.mall.product.entity.SkuInfoEntity;
-import com.like.mall.product.service.SkuInfoService;
+import com.like.mall.product.entity.SpuInfoDescEntity;
+import com.like.mall.product.service.*;
+import com.like.mall.product.vo.SkuItemSaleAttrVo;
+import com.like.mall.product.vo.SkuItemVo;
+import com.like.mall.product.vo.SpuItemAttrGroupVo;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 @Service("skuInfoService")
@@ -67,6 +76,68 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
     public List<SkuInfoEntity> getSkuBySpuId(Long spuId) {
         return this.list(new QueryWrapper<SkuInfoEntity>().eq("spu_id", spuId));
     }
+
+
+
+    @Autowired
+    ThreadPoolExecutor threadPool;
+
+    @Override
+    public SkuItemVo item(Long skuId) {
+        SkuItemVo res = new SkuItemVo();
+        AtomicReference<Long> spuId = new AtomicReference<>();
+        AtomicReference<Long> catalogId = new AtomicReference<>();
+
+        CompletableFuture<SkuInfoEntity> skuInfoFuture = CompletableFuture.supplyAsync(() -> {
+            // 1.sku基本信息
+            SkuInfoEntity skuInfo = getById(skuId);
+            res.setSkuInfoEntity(skuInfo);
+
+            spuId.set(skuInfo.getSpuId());
+            catalogId.set(skuInfo.getCatalogId());
+            return skuInfo;
+        }, threadPool);
+
+        CompletableFuture<Void> spuSaleFuture = skuInfoFuture.thenAcceptAsync((r) -> {
+            // 3.spu的销售属性
+            List<SkuItemSaleAttrVo> saleAttrVo = skuSaleAttrValueService.getSpuId(skuId);
+            res.setSaleAttrs(saleAttrVo);
+        }, threadPool);
+
+        CompletableFuture<Void> spuDescFuture = skuInfoFuture.thenAcceptAsync((r) -> {
+            // 4.spu的介绍
+            SpuInfoDescEntity desc = spuInfoDescService.getById(spuId);
+            res.setDesc(desc);
+        }, threadPool);
+
+        CompletableFuture<Void> spuAttrFuture = skuInfoFuture.thenAcceptAsync((r) -> {
+            // 5.spu的规格参数
+            List<SpuItemAttrGroupVo> groupVos = attrGroupService.getBySpuId(spuId.get(), catalogId.get());
+            res.setGroupAttrs(groupVos);
+        }, threadPool);
+
+        CompletableFuture<Void> imagesFuture = CompletableFuture.runAsync(() -> {
+            // 2.sku的图片信息
+            List<SkuImagesEntity> images = skuImagesService.getBySkuId(skuId);
+            res.setImages(images);
+        }, threadPool);
+
+        try {
+            CompletableFuture.allOf(imagesFuture, skuInfoFuture, spuAttrFuture, spuDescFuture, spuSaleFuture).get();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return res;
+    }
+    @Autowired
+    SkuImagesService skuImagesService;
+    @Autowired
+    SpuInfoDescService spuInfoDescService;
+    @Autowired
+    AttrGroupService attrGroupService;
+    @Autowired
+    SkuSaleAttrValueService skuSaleAttrValueService;
 
     public void queryCondition(QueryWrapper<SkuInfoEntity> query, Map<String, Object> params, String key, String colName) {
         String status = (String) params.get(key);
