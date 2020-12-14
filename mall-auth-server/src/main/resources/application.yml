@@ -11,7 +11,9 @@ spring:
 
   thymeleaf:
     cache: false
-
+  redis:
+    host: 47.112.150.204
+    port: 6379
 #
 #
 ## mybatis设置
