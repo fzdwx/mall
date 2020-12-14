@@ -1,0 +1,25 @@
+server:
+  port: 7777
+spring:
+  # 微服务
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 47.112.150.204:8848
+  application:
+    name: mall-auth
+
+  thymeleaf:
+    cache: false
+
+#
+#
+## mybatis设置
+#mybatis-plus:
+#  mapper-locations: classpath:/mapper/**/*.xml
+#  global-config:
+#    db-config:
+#      id-type: auto
+#  configuration:
+#    # 日志打印
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
