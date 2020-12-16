@@ -1,5 +1,6 @@
 package com.like.mall.authserver.controller;
 
+import com.like.mall.authserver.Vo.UserLoginVo;
 import com.like.mall.authserver.Vo.UserRegisterVo;
 import com.like.mall.authserver.feign.MemberFeignService;
 import com.like.mall.authserver.feign.SmsFeignService;
@@ -8,11 +9,12 @@ import com.like.mall.common.utils.R;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
 import java.util.UUID;
@@ -24,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  * @contactMe 980650920@qq.com
  * @description
  */
-@RestController
+@Controller
 public class LoginController {
 
     @Autowired
@@ -33,6 +35,7 @@ public class LoginController {
     private StringRedisTemplate redisTemplate;
 
     @GetMapping("/sms/sendSms")
+    @ResponseBody
     public R sendSms(@RequestParam("mobile") String mobile) {
         // 1.接口防刷
         String s = redisTemplate.opsForValue().get(AutoConstant.SMS_CODE_CACHE_PREFIX + mobile);
@@ -77,6 +80,18 @@ public class LoginController {
         // 重定向到登录页面
         return "redirect:/login.html";
     }
+
+    @PostMapping("/login")
+    public String login(UserLoginVo vo) {
+
+        // 远程
+        R login = memberFeignService.login(vo);
+        if (login.getCode() != 0) {
+            return "redirect:/login.html";
+        }
+        return  "redirect:http://localhost:12000";
+    }
+
     @Autowired
     private MemberFeignService memberFeignService;
 }

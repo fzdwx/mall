@@ -3,6 +3,7 @@ package com.like.mall.member.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.member.entity.MemberEntity;
+import com.like.mall.member.vo.UserLoginVo;
 import com.like.mall.member.vo.UserRegisterVo;
 
 import java.util.Map;
@@ -25,5 +26,7 @@ public interface MemberService extends IService<MemberEntity> {
     boolean checkUsername(String username);
 
     void register(UserRegisterVo vo);
+
+    MemberEntity login(UserLoginVo vo);
 }
 

@@ -9,6 +9,7 @@ import com.like.mall.member.dao.MemberDao;
 import com.like.mall.member.entity.MemberEntity;
 import com.like.mall.member.exception.UserInfoExistException;
 import com.like.mall.member.service.MemberService;
+import com.like.mall.member.vo.UserLoginVo;
 import com.like.mall.member.vo.UserRegisterVo;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -70,6 +71,27 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
                 .levelId(1L)
                 .build();
         save(memberEntity);
+    }
+
+    @Override
+    public MemberEntity login(UserLoginVo vo) {
+        String loginName = vo.getLoginName();
+        String rawPasswd = vo.getPassword();
+        MemberEntity dbMember = getOne(new QueryWrapper<MemberEntity>()
+                .eq("username", loginName)
+                .or()
+                .eq("mobile", loginName)
+                .or()
+                .eq("email", loginName)
+        );
+        if (dbMember != null) {
+            // 密码匹配
+            String encryptedPassword = dbMember.getPassword();
+            if (new BCryptPasswordEncoder().matches(rawPasswd, encryptedPassword)) {
+                return dbMember;
+            }
+        }
+        return null;
     }
 
     public void check(String check, String field) {

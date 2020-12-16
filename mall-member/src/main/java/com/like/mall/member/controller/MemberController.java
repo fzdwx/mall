@@ -5,6 +5,7 @@ import com.like.mall.common.utils.R;
 import com.like.mall.member.entity.MemberEntity;
 import com.like.mall.member.feign.CouponFeignService;
 import com.like.mall.member.service.MemberService;
+import com.like.mall.member.vo.UserLoginVo;
 import com.like.mall.member.vo.UserRegisterVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +36,15 @@ public class MemberController {
     public R testCoupon() {
         R r = couponFeignService.memberCoupons();
         return r;
+    }
+
+    @PostMapping("/login")
+    public R login(@RequestBody UserLoginVo vo) {
+        MemberEntity member = memberService.login(vo);
+        if (member == null) {
+            return R.error("登录失败");
+        }
+        return R.ok();
     }
 
 
