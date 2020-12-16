@@ -1,14 +1,20 @@
 package com.like.mall.authserver.controller;
 
+import com.like.mall.authserver.Vo.UserRegisterVo;
+import com.like.mall.authserver.feign.MemberFeignService;
 import com.like.mall.authserver.feign.SmsFeignService;
 import com.like.mall.common.constant.AutoConstant;
 import com.like.mall.common.utils.R;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -44,4 +50,34 @@ public class LoginController {
         return smsFeignService.sendSms(mobile, code.substring(0, 5));
     }
 
+    /**
+     * 注册用户
+     *
+     * @return {@link String}
+     */
+    @PostMapping("/register")
+    public String register(@Valid UserRegisterVo vo, BindingResult result) {
+        String goUrl = "redirect:/login.html";
+
+        if (result.hasErrors()) {
+            goUrl = "redirect:http://localhost:7777/reg.html";
+        } else {
+            // 1.校验验证码
+            String code = vo.getCode();
+            String mobile = vo.getMobile();
+            String redisCode = redisTemplate.opsForValue().get(AutoConstant.SMS_CODE_CACHE_PREFIX + mobile);
+            if (StringUtils.isNoneBlank(redisCode) && code.equals(redisCode)) {
+                goUrl = "redirect:http://localhost:7777/reg.html";
+            }else {
+                // 2.验证码正确
+                redisTemplate.delete(AutoConstant.SMS_CODE_CACHE_PREFIX + mobile);      // 删除验证码
+                // 3.调用用户服务保存用户信息
+                memberFeignService.register(vo);
+            }
+        }
+        // 重定向到登录页面
+        return goUrl;
+    }
+    @Autowired
+    private MemberFeignService memberFeignService;
 }

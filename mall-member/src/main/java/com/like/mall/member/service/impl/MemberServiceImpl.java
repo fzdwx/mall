@@ -1,20 +1,27 @@
 package com.like.mall.member.service.impl;
 
-import org.springframework.stereotype.Service;
-import java.util.Map;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.Query;
-
 import com.like.mall.member.dao.MemberDao;
 import com.like.mall.member.entity.MemberEntity;
+import com.like.mall.member.exception.UserInfoExistException;
 import com.like.mall.member.service.MemberService;
+import com.like.mall.member.vo.UserRegisterVo;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 
 @Service("memberService")
 public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> implements MemberService {
+    public static void main(String[] args) {
+        MemberServiceImpl s = new MemberServiceImpl();
+        s.checkEmail("123");
+    }
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -24,6 +31,51 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         );
 
         return new PageUtils(page);
+    }
+
+    @Override
+    public boolean checkEmail(String email) {
+        getOne(email);
+        return true;
+    }
+
+    public void getOne(String email) {
+        getEnt(email, "email");
+    }
+
+    @Override
+    public boolean checkMobile(String mobile) {
+        getEnt(mobile, "mobile");
+        return true;
+    }
+
+    @Override
+    public boolean checkUsername(String username) {
+        getEnt(username, "username");
+        return true;
+    }
+
+    @Override
+    public void register(UserRegisterVo vo) {
+        // 检查用户是否唯一
+        checkMobile(vo.getMobile());
+        checkUsername(vo.getUsername());
+
+        // 保存
+        MemberEntity memberEntity = MemberEntity.builder()
+                .username(vo.getUsername())
+                .password(new BCryptPasswordEncoder().encode(vo.getPassword()))  // 密码加密
+                .mobile(vo.getMobile())
+                .levelId(1L)
+                .build();
+        save(memberEntity);
+    }
+
+    public void getEnt(String check, String field) {
+        MemberEntity one = getOne(new QueryWrapper<MemberEntity>().eq(field, check));
+        if (one != null) {
+            throw new UserInfoExistException(one);
+        }
     }
 
 }
