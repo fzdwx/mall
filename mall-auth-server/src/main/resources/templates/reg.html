@@ -18,7 +18,8 @@
     </div>
 </header>
 <section>
-    <form action="/regist" class="one">
+    <form action="/register" class="one"  method="post">
+        <input name="_method" value="post" type="hidden">
         <div class="register-box">
             <label  class="username_label">用 户 名
                 <input  name="username" maxlength="20" type="text" placeholder="您的用户名和登录名">

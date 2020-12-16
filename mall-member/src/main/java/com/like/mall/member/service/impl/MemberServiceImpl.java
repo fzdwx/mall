@@ -40,23 +40,24 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
     }
 
     public void getOne(String email) {
-        getEnt(email, "email");
+        check(email, "email");
     }
 
     @Override
     public boolean checkMobile(String mobile) {
-        getEnt(mobile, "mobile");
+        check(mobile, "mobile");
         return true;
     }
 
     @Override
     public boolean checkUsername(String username) {
-        getEnt(username, "username");
+        check(username, "username");
         return true;
     }
 
     @Override
     public void register(UserRegisterVo vo) {
+        System.out.println("用户注册");
         // 检查用户是否唯一
         checkMobile(vo.getMobile());
         checkUsername(vo.getUsername());
@@ -71,7 +72,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         save(memberEntity);
     }
 
-    public void getEnt(String check, String field) {
+    public void check(String check, String field) {
         MemberEntity one = getOne(new QueryWrapper<MemberEntity>().eq(field, check));
         if (one != null) {
             throw new UserInfoExistException(one);

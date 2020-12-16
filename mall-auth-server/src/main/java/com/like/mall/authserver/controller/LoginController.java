@@ -57,17 +57,16 @@ public class LoginController {
      */
     @PostMapping("/register")
     public String register(@Valid UserRegisterVo vo, BindingResult result) {
-        String goUrl = "redirect:/login.html";
 
         if (result.hasErrors()) {
-            goUrl = "redirect:http://localhost:7777/reg.html";
+           return  "redirect:http://localhost:7777/reg.html";
         } else {
             // 1.校验验证码
             String code = vo.getCode();
             String mobile = vo.getMobile();
             String redisCode = redisTemplate.opsForValue().get(AutoConstant.SMS_CODE_CACHE_PREFIX + mobile);
             if (StringUtils.isNoneBlank(redisCode) && code.equals(redisCode)) {
-                goUrl = "redirect:http://localhost:7777/reg.html";
+                return  "redirect:http://localhost:7777/reg.html";
             }else {
                 // 2.验证码正确
                 redisTemplate.delete(AutoConstant.SMS_CODE_CACHE_PREFIX + mobile);      // 删除验证码
@@ -76,7 +75,7 @@ public class LoginController {
             }
         }
         // 重定向到登录页面
-        return goUrl;
+        return "redirect:/login.html";
     }
     @Autowired
     private MemberFeignService memberFeignService;
