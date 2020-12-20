@@ -29,6 +29,8 @@ spring:
     redis:
       # ttl:
       time-to-live: 3600000
+  session:
+    store-type: redis
 
 # mybatis设置
 mybatis-plus:

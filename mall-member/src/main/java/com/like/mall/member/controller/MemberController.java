@@ -44,7 +44,7 @@ public class MemberController {
         if (member == null) {
             return R.error("登录失败");
         }
-        return R.ok();
+        return R.ok().put("loginUser",member);
     }
 
 

@@ -2,6 +2,8 @@ package com.like.mall.member.vo;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * @author like
  * @date 2020-12-16 18:53
@@ -9,7 +11,7 @@ import lombok.Data;
  * @description
  */
 @Data
-public class UserLoginVo {
+public class UserLoginVo implements Serializable {
 
     private String loginName;
     private String password;

@@ -1,11 +1,13 @@
 package com.like.mall.authserver.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.like.mall.authserver.Vo.UserLoginVo;
 import com.like.mall.authserver.Vo.UserRegisterVo;
 import com.like.mall.authserver.feign.MemberFeignService;
 import com.like.mall.authserver.feign.SmsFeignService;
 import com.like.mall.common.constant.AutoConstant;
 import com.like.mall.common.utils.R;
+import com.like.mall.common.vo.MemberVo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -82,13 +85,15 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public String login(UserLoginVo vo) {
+    public String login(UserLoginVo vo, HttpSession session) {
 
         // 远程
         R login = memberFeignService.login(vo);
-        if (login.getCode() != 0) {
+        if (login == null || login.getCode() != 0) {
             return "redirect:/login.html";
         }
+        MemberVo loginUser = BeanUtil.toBean(login.get("loginUser"), MemberVo.class);
+        session.setAttribute("loginUser",loginUser);
         return  "redirect:http://localhost:12000";
     }
 
