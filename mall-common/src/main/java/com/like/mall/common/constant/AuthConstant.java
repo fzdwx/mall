@@ -6,7 +6,9 @@ package com.like.mall.common.constant;
  * @contactMe 980650920@qq.com
  * @description
  */
-public class AutoConstant {
+public class AuthConstant {
 
     public static final String SMS_CODE_CACHE_PREFIX= "sms:mobile:";
+    public static final String LOGIN_USER =  "loginUser";
+    public static final String goIndex =  "redirect:http://localhost:12000";
 }

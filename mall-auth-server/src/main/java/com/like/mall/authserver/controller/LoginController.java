@@ -5,7 +5,7 @@ import com.like.mall.authserver.Vo.UserLoginVo;
 import com.like.mall.authserver.Vo.UserRegisterVo;
 import com.like.mall.authserver.feign.MemberFeignService;
 import com.like.mall.authserver.feign.SmsFeignService;
-import com.like.mall.common.constant.AutoConstant;
+import com.like.mall.common.constant.AuthConstant;
 import com.like.mall.common.utils.R;
 import com.like.mall.common.vo.MemberVo;
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +22,9 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import static com.like.mall.common.constant.AuthConstant.LOGIN_USER;
+import static com.like.mall.common.constant.AuthConstant.goIndex;
 
 /**
  * @author like
@@ -41,7 +44,7 @@ public class LoginController {
     @ResponseBody
     public R sendSms(@RequestParam("mobile") String mobile) {
         // 1.接口防刷
-        String s = redisTemplate.opsForValue().get(AutoConstant.SMS_CODE_CACHE_PREFIX + mobile);
+        String s = redisTemplate.opsForValue().get(AuthConstant.SMS_CODE_CACHE_PREFIX + mobile);
 
         // 60s内不能在次发送
         if (s != null && System.currentTimeMillis() - Long.parseLong(s.split("_")[1]) < 60000) {
@@ -52,7 +55,7 @@ public class LoginController {
         String code = UUID.randomUUID().toString().substring(0, 5) + "_" + System.currentTimeMillis();
 
         // 2.验证码再次校验  sms:code:13789983260,12345   10min有效期
-        redisTemplate.opsForValue().set(AutoConstant.SMS_CODE_CACHE_PREFIX + mobile, code, 10, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(AuthConstant.SMS_CODE_CACHE_PREFIX + mobile, code, 10, TimeUnit.MINUTES);
         return smsFeignService.sendSms(mobile, code.substring(0, 5));
     }
 
@@ -70,12 +73,12 @@ public class LoginController {
             // 1.校验验证码
             String code = vo.getCode();
             String mobile = vo.getMobile();
-            String redisCode = redisTemplate.opsForValue().get(AutoConstant.SMS_CODE_CACHE_PREFIX + mobile);
+            String redisCode = redisTemplate.opsForValue().get(AuthConstant.SMS_CODE_CACHE_PREFIX + mobile);
             if (StringUtils.isNoneBlank(redisCode) && code.equals(redisCode)) {
                 return  "redirect:http://localhost:7777/reg.html";
             }else {
                 // 2.验证码正确
-                redisTemplate.delete(AutoConstant.SMS_CODE_CACHE_PREFIX + mobile);      // 删除验证码
+                redisTemplate.delete(AuthConstant.SMS_CODE_CACHE_PREFIX + mobile);      // 删除验证码
                 // 3.调用用户服务保存用户信息
                 memberFeignService.register(vo);
             }
@@ -92,9 +95,17 @@ public class LoginController {
         if (login == null || login.getCode() != 0) {
             return "redirect:/login.html";
         }
-        MemberVo loginUser = BeanUtil.toBean(login.get("loginUser"), MemberVo.class);
-        session.setAttribute("loginUser",loginUser);
-        return  "redirect:http://localhost:12000";
+        MemberVo loginUser = BeanUtil.toBean(login.get(LOGIN_USER), MemberVo.class);
+        session.setAttribute(LOGIN_USER,loginUser);
+        return  goIndex;
+    }
+
+    @GetMapping("/login.html")
+    public String loginPage(HttpSession session) {
+        if (session.getAttribute(LOGIN_USER) != null) {
+            return goIndex;
+        }
+        return "login";
     }
 
     @Autowired
