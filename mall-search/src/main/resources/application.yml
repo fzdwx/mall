@@ -9,6 +9,12 @@ spring:
       # 注册地址
       discovery:
         server-addr:  47.112.150.204:8848
+  redis:
+    host: 47.112.150.204
+    port: 6379
+  session:
+    store-type: redis
+
   application:
     name: mall-search
   jackson:
