@@ -73,7 +73,10 @@
 					<groupId>com.alibaba.cloud</groupId>
 					<artifactId>spring-cloud-starter-alicloud-oss</artifactId>
 				</exclusion>
-
+				<exclusion>
+					<groupId>javax.mail</groupId>
+					<artifactId>mail</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
