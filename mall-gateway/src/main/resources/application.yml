@@ -60,8 +60,22 @@ spring:
         - id: mall_search_route
           uri: lb://mall-search
           predicates:
+            - Path=/api/search/**
             - Host=search.mall.com
-
+        #mall-auth-server
+        - id: auth_route
+            uri: lb://mall-auth
+            predicates:
+              - Path=/api/auth/**
+            filters:
+              - RewritePath=/api/(?<segment>.*),/$\{segment}
+      #mall-auth-server
+        - id: cart_route
+          uri: lb://mall-cart
+          predicates:
+            - Path=/api/cart/**
+          filters:
+           - RewritePath=/api/(?<segment>.*),/$\{segment}
 
   application:
     name: mall-gateway

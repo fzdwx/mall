@@ -19,6 +19,8 @@
         <module>mall-sys</module>
         <module>mall-party</module>
         <module>mall-search</module>
+        <module>mall-auth-server</module>
+        <module>mall-cart</module>
     </modules>
 
 </project>
