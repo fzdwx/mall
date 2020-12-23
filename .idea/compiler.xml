@@ -12,14 +12,14 @@
         <module name="mall-search" />
         <module name="mall-common" />
         <module name="mall-auth-server" />
-        <module name="mall-coupon" />
         <module name="mall-cart" />
+        <module name="mall-coupon" />
         <module name="mall-party" />
         <module name="mall-order" />
         <module name="mall-product" />
         <module name="mall-generator" />
-        <module name="mall-member" />
         <module name="mall-gateway" />
+        <module name="mall-member" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="8">
