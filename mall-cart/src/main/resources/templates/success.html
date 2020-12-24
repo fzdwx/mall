@@ -26,7 +26,7 @@
 
         <ul class="hd_wrap_right">
             <li>
-                <a  th:if="${session.loginUser!=null}">欢迎：[[${session.loginUser.username}]]</a>
+                <a th:if="${session.loginUser!=null}">欢迎：[[${session.loginUser.username}]]</a>
                 <a href="http://localhost:7777/login.html" th:if="${session.loginUser==null}">欢迎，请登录！</a>
             </li>
             <li>
@@ -66,7 +66,7 @@
     <div class="success-wrap">
         <div class="w" id="result">
             <div class="m succeed-box">
-                <div class="mc success-cont">
+                <div th:if="${item !=null}" class="mc success-cont">
                     <div class="success-lcol">
                         <div class="success-top"><b class="succ-icon"></b>
                             <h3 class="ftx-02">商品已成功加入购物车</h3></div>
@@ -98,6 +98,9 @@
                                id="GotoShoppingCart"><b></b>去购物车结算</a>
                         </div>
                     </div>
+                </div>
+                <div th:if="${item ==null}" class="mc success-cont">
+                    没有对应的信息
                 </div>
             </div>
         </div>
