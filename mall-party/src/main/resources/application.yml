@@ -12,6 +12,10 @@ spring:
       server-addr: 47.112.150.204:8848
   application:
     name: mall-party
+  redis:
+    host: 47.112.150.204
+  session:
+    store-type: redis
 
 server:
   port: 13000

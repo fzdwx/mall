@@ -17,8 +17,7 @@
 
             <ul class="header-left">
                 <li>
-
-                    <a href="">首页</a>
+                    <a href="http://localhost:12000">首页</a>
                 </li>
 
             </ul>
@@ -48,7 +47,7 @@
         <div class="one_search_top">
             <div class="one_top_left">
                 <a href="../" class="one_left_logo"><img src="img/logo1.jpg"></a>
-                <a href="#" class="one_left_link">购物车</a>
+                <a href="http://localhost:7788/cartList.html" class="one_left_link">购物车</a>
             </div>
             <div class="one_top_right">
                 <input type="text" class="one_right_txt" placeholder="" onfocus="this.placeholder=''"
@@ -56,10 +55,10 @@
                 <input type="button" value="搜索" class="one_right_btn">
             </div>
         </div>
-        <div class="one_search_load" th:if="${userId}==null">
+        <div class="one_search_load" th:if="${session.loginUser==null}">
             <img src="./img/shop_07.jpg" class="one_load_wraing">
             <span>您还没有登录！登录后购物车的商品将保存到您账号中</span>
-            <a href="#"><input type="button" onclick="login()" value="立即登录" class="one_load_btn"></a>
+            <ahref="http://localhost:7777/login.html"><input type="button"  value="立即登录" class="one_load_btn"></a>
         </div>
     </div>
 </div>

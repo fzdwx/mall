@@ -19,6 +19,8 @@ spring:
   # mybatis设置
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
+  redis:
+    host: 47.112.150.204
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml
   global-config:

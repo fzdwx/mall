@@ -29,7 +29,7 @@ public class SkuImagesServiceImpl extends ServiceImpl<SkuImagesDao, SkuImagesEnt
 
     @Override
     public List<SkuImagesEntity> getBySkuId(Long skuId) {
-        return list(new QueryWrapper<SkuImagesEntity>().eq("skuId", skuId));
+        return list(new QueryWrapper<SkuImagesEntity>().eq("sku_id", skuId));
 
     }
 

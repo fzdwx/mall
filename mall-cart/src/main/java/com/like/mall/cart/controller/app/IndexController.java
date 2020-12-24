@@ -1,8 +1,15 @@
 package com.like.mall.cart.controller.app;
 
+import com.like.mall.cart.service.CartService;
+import com.like.mall.cart.vo.CartItem;
 import com.like.mall.cart.vo.UserInfo;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.annotation.Resource;
+import java.util.concurrent.ExecutionException;
 
 import static com.like.mall.cart.interceptor.CartInterceptor.userInfoLocal;
 
@@ -14,6 +21,15 @@ import static com.like.mall.cart.interceptor.CartInterceptor.userInfoLocal;
  */
 @Controller
 public class IndexController {
+    @Resource
+    CartService cartService;
+
+    @GetMapping("/addToCart")
+    public String addToCart(@RequestParam String skuId, @RequestParam Integer num, Model model) throws ExecutionException, InterruptedException {
+        CartItem cartItem = cartService.addToCart(skuId, num);
+        model.addAttribute("item", cartItem);
+        return "success";
+    }
 
 
     /**
@@ -26,7 +42,7 @@ public class IndexController {
      * @return {@link String}
      */
     @GetMapping("/cartList.html")
-    public String cartList( ) {
+    public String cartList() {
         // 获取当前登录用户的信息
         UserInfo userinfo = userInfoLocal.get();
         return "cartList";

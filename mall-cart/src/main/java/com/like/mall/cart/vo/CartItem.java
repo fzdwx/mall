@@ -24,7 +24,12 @@ public class CartItem {
     private BigDecimal totalPrice;
 
     public BigDecimal getTotalPrice() {
-        totalPrice = price.multiply(new BigDecimal(count));
+        if (count == null) {
+            count = 0;
+        }
+        BigDecimal count = new BigDecimal(this.count);
+
+        totalPrice = price.multiply(count);
         return totalPrice;
     }
 }

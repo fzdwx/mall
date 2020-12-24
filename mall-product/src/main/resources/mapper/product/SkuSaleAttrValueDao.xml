@@ -4,6 +4,14 @@
 <mapper namespace="com.like.mall.product.dao.SkuSaleAttrValueDao">
 
     <!-- 可根据自己的需求，是否要使用 -->
+    <sql id="Base_Column_List">
+        id,
+        sku_id,
+        attr_id,
+        attr_name,
+        attr_value,
+        attr_sort
+    </sql>
     <resultMap type="com.like.mall.product.entity.SkuSaleAttrValueEntity" id="skuSaleAttrValueMap">
         <result property="id" column="id"/>
         <result property="skuId" column="sku_id"/>
@@ -23,5 +31,9 @@
         group by ssav.attr_id, ssav.attr_name
     </select>
 
-
+    <select id="getSkuSaleAttrValue" resultType="java.lang.String">
+        select concat(attr_value,":",attr_value)
+        from `mall-product`.pms_sku_sale_attr_value
+        where sku_id =#{skuId}
+    </select>
 </mapper>

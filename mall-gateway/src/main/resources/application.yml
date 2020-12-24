@@ -64,11 +64,11 @@ spring:
             - Host=search.mall.com
         #mall-auth-server
         - id: auth_route
-            uri: lb://mall-auth
-            predicates:
-              - Path=/api/auth/**
-            filters:
-              - RewritePath=/api/(?<segment>.*),/$\{segment}
+          uri: lb://mall-auth
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
       #mall-auth-server
         - id: cart_route
           uri: lb://mall-cart

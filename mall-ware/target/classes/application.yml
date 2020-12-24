@@ -8,10 +8,24 @@ spring:
     password: root
     url: jdbc:mysql://47.112.150.204:3306/mall-ware
     driver-class-name: com.mysql.jdbc.Driver
-
+  # 微服务
+  cloud:
+    nacos:
+      # 注册地址
+      discovery:
+        server-addr:  47.112.150.204:8848
+  application:
+    name: mall-ware
   # mybatis设置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+  redis:
+    host: 47.112.150.204
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml
   global-config:
     db-config:
       id-type: auto
+
+  configuration:
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
