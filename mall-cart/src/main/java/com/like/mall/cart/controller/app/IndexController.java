@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.Resource;
 import java.util.concurrent.ExecutionException;
@@ -25,12 +26,20 @@ public class IndexController {
     CartService cartService;
 
     @GetMapping("/addToCart")
-    public String addToCart(@RequestParam String skuId, @RequestParam Integer num, Model model) throws ExecutionException, InterruptedException {
-        CartItem cartItem = cartService.addToCart(skuId, num);
-        model.addAttribute("item", cartItem);
-        return "success";
+    public String addToCart(@RequestParam String skuId, @RequestParam Integer num, RedirectAttributes attributes) throws ExecutionException, InterruptedException {
+        // 保存购物项
+        cartService.addToCart(skuId, num);
+        attributes.addAttribute("skuId",skuId);
+        return  "redirect:http:/localhost:7788/success.html";
     }
 
+    @GetMapping("/success.html")
+    public  String successHtml(@RequestParam String skuId,Model model){
+        // 获取购物项
+        CartItem item = cartService.getCartItem(skuId);
+        model.addAttribute("item",item);
+        return "success";
+    }
 
     /**
      * 购物车列表

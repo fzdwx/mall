@@ -2,6 +2,7 @@ package com.like.mall.cart.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.like.mall.cart.feign.ProductFeignService;
 import com.like.mall.cart.interceptor.CartInterceptor;
 import com.like.mall.cart.service.CartService;
@@ -38,7 +39,7 @@ public class CartServiceImpl implements CartService {
     private ThreadPoolExecutor thread;
 
     @Override
-    public CartItem addToCart(String skuId, Integer num) throws ExecutionException, InterruptedException {
+    public void addToCart(String skuId, Integer num) throws ExecutionException, InterruptedException {
         BoundHashOperations<String, Object, Object> ops = getCartOps();
         CartItem cartItem;
 
@@ -75,7 +76,13 @@ public class CartServiceImpl implements CartService {
         // 3.保存到redis中
         ops.put(JSON.toJSONString(skuId), cartItem);
 
-        return cartItem;
+    }
+
+    @Override
+    public CartItem getCartItem(String skuId) {
+        BoundHashOperations<String, Object, Object> ops = getCartOps();
+        String s = (String) ops.get(JSON.toJSONString(skuId));
+        return JSON.parseObject(s, new TypeReference<CartItem>() {});
     }
 
     /**

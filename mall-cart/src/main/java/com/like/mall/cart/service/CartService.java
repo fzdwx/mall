@@ -12,5 +12,13 @@ import java.util.concurrent.ExecutionException;
  */
 public interface CartService {
 
-    public CartItem addToCart(String skuId, Integer num) throws ExecutionException, InterruptedException;
+    public void addToCart(String skuId, Integer num) throws ExecutionException, InterruptedException;
+
+    /**
+     * 获取购物车中的购物项
+     *
+     * @param skuId sku id
+     * @return {@link CartItem}
+     */
+    CartItem getCartItem(String skuId);
 }
