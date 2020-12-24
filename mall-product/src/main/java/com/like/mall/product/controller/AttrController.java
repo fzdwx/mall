@@ -1,4 +1,4 @@
-package com.like.mall.product.controller.app;
+package com.like.mall.product.controller;
 
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.R;
@@ -22,8 +22,10 @@ import java.util.Map;
  * @author like
  * @email 980650920@qq.com
  * @date 2020-10-25 11:35:49
+ * com.like.mall.product.controller.AttrController
+ * com.like.mall.product.controller.AttrController
  */
-@RestController
+@RestController()
 @RequestMapping("product/attr")
 public class AttrController {
     @Autowired

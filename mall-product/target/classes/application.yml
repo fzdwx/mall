@@ -7,11 +7,50 @@ spring:
     username: root
     password: root
     url: jdbc:mysql://47.112.150.204:3306/mall-product
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  # 微服务
+  cloud:
+    nacos:
+      # 注册地址
+      discovery:
+        server-addr:  47.112.150.204:8848
+  application:
+    name: mall-product
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+  thymeleaf:
+    cache: false
+  redis:
+    host: 47.112.150.204
+    port: 6379
+  # 缓存类型
+  cache:
+    type: redis
+    redis:
+      # ttl:
+      time-to-live: 3600000
+  session:
+    store-type: redis
 
 # mybatis设置
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml
   global-config:
     db-config:
+      # 主键自增
       id-type: auto
+      # 逻辑删除
+      logic-delete-value: 1 # 被删除
+      logic-not-delete-value: 0 #没有被删除
+  # 显示mybatis日志
+  configuration:
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+#
+#logging:
+#  level:
+#    com.like.mall: debug
+thread:
+  pool:
+    core-size: 20
+    max-size: 200
+    keep-alive: 10

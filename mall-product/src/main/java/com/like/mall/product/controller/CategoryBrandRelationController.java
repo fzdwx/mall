@@ -1,4 +1,4 @@
-package com.like.mall.product.controller.app;
+package com.like.mall.product.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.like.mall.common.utils.PageUtils;

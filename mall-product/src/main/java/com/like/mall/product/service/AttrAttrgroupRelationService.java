@@ -20,15 +20,5 @@ public interface AttrAttrgroupRelationService extends IService<AttrAttrgroupRela
     PageUtils queryPage(Map<String, Object> params);
 
     int saveAttrAndAttrGroupRrtion(List<AttrGroupRelationVo> vos);
-
-
-
-	AttrAttrgroupRelationEntity findOneByAllOrderByAttrGroupIdDesc(AttrAttrgroupRelationEntity attrAttrgroupRelationEntity);
-
-
-
-	List<AttrAttrgroupRelationEntity> selectByAllOrderByAttrGroupIdDesc(AttrAttrgroupRelationEntity attrAttrgroupRelationEntity);
-
-
 }
 

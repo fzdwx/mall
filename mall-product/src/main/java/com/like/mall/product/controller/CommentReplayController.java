@@ -1,9 +1,9 @@
-package com.like.mall.product.controller.app;
+package com.like.mall.product.controller;
 
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.R;
-import com.like.mall.product.entity.ProductAttrValueEntity;
-import com.like.mall.product.service.ProductAttrValueService;
+import com.like.mall.product.entity.CommentReplayEntity;
+import com.like.mall.product.service.CommentReplayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,24 +13,24 @@ import java.util.Map;
 
 
 /**
- * spu属性值
+ * 商品评价回复关系
  *
  * @author like
  * @email 980650920@qq.com
  * @date 2020-10-25 11:35:48
  */
 @RestController
-@RequestMapping("product/productattrvalue")
-public class ProductAttrValueController {
+@RequestMapping("product/commentreplay")
+public class CommentReplayController {
     @Autowired
-    private ProductAttrValueService productAttrValueService;
+    private CommentReplayService commentReplayService;
 
     /**
      * 列表
      */
     @RequestMapping("/list")
     public R list(@RequestParam Map<String, Object> params){
-        PageUtils page = productAttrValueService.queryPage(params);
+        PageUtils page = commentReplayService.queryPage(params);
 
         return R.ok().put("page", page);
     }
@@ -41,17 +41,17 @@ public class ProductAttrValueController {
      */
     @RequestMapping("/info/{id}")
     public R info(@PathVariable("id") Long id){
-		ProductAttrValueEntity productAttrValue = productAttrValueService.getById(id);
+		CommentReplayEntity commentReplay = commentReplayService.getById(id);
 
-        return R.ok().put("productAttrValue", productAttrValue);
+        return R.ok().put("commentReplay", commentReplay);
     }
 
     /**
      * 保存
      */
     @RequestMapping("/save")
-    public R save(@RequestBody ProductAttrValueEntity productAttrValue){
-		productAttrValueService.save(productAttrValue);
+    public R save(@RequestBody CommentReplayEntity commentReplay){
+		commentReplayService.save(commentReplay);
 
         return R.ok();
     }
@@ -60,8 +60,8 @@ public class ProductAttrValueController {
      * 修改
      */
     @RequestMapping("/update")
-    public R update(@RequestBody ProductAttrValueEntity productAttrValue){
-		productAttrValueService.updateById(productAttrValue);
+    public R update(@RequestBody CommentReplayEntity commentReplay){
+		commentReplayService.updateById(commentReplay);
 
         return R.ok();
     }
@@ -71,7 +71,7 @@ public class ProductAttrValueController {
      */
     @RequestMapping("/delete")
     public R delete(@RequestBody Long[] ids){
-		productAttrValueService.removeByIds(Arrays.asList(ids));
+		commentReplayService.removeByIds(Arrays.asList(ids));
 
         return R.ok();
     }

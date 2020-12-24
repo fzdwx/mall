@@ -1,4 +1,4 @@
-package com.like.mall.product.controller.app;
+package com.like.mall.product.controller;
 
 import com.like.mall.common.utils.R;
 import com.like.mall.product.entity.CategoryEntity;
