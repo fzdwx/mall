@@ -1,5 +1,6 @@
 package com.like.mall.cart.service;
 
+import com.like.mall.cart.vo.Cart;
 import com.like.mall.cart.vo.CartItem;
 
 import java.util.concurrent.ExecutionException;
@@ -12,7 +13,7 @@ import java.util.concurrent.ExecutionException;
  */
 public interface CartService {
 
-    public void addToCart(String skuId, Integer num) throws ExecutionException, InterruptedException;
+    public void addItemToCart(String skuId, Integer num) throws ExecutionException, InterruptedException;
 
     /**
      * 获取购物车中的购物项
@@ -21,4 +22,6 @@ public interface CartService {
      * @return {@link CartItem}
      */
     CartItem getCartItem(String skuId);
+
+    Cart getCart() throws ExecutionException, InterruptedException;
 }

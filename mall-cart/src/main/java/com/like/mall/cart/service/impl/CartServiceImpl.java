@@ -6,6 +6,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.like.mall.cart.feign.ProductFeignService;
 import com.like.mall.cart.interceptor.CartInterceptor;
 import com.like.mall.cart.service.CartService;
+import com.like.mall.cart.vo.Cart;
 import com.like.mall.cart.vo.CartItem;
 import com.like.mall.cart.vo.UserInfo;
 import com.like.mall.common.utils.R;
@@ -21,6 +22,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 /**
  * @author like
@@ -39,7 +41,7 @@ public class CartServiceImpl implements CartService {
     private ThreadPoolExecutor thread;
 
     @Override
-    public void addToCart(String skuId, Integer num) throws ExecutionException, InterruptedException {
+    public void addItemToCart(String skuId, Integer num) throws ExecutionException, InterruptedException {
         BoundHashOperations<String, Object, Object> ops = getCartOps();
         CartItem cartItem;
 
@@ -85,8 +87,58 @@ public class CartServiceImpl implements CartService {
         return JSON.parseObject(s, new TypeReference<CartItem>() {});
     }
 
+    @Override
+    public Cart getCart() throws ExecutionException, InterruptedException {
+        UserInfo user = CartInterceptor.userInfoLocal.get();
+        Cart cart = new Cart();
+
+        // 1.获取离线购物车
+        List<CartItem> items = getCartItems(cart_prefix+user.getUserKey());
+        // 判断离线购物车中是否有内容
+        if (items != null && items.size() > 0) {
+            // 2.获取登录购物车
+            Long userId = user.getUserId();
+            if (userId != null) {
+                // 3.用戶已经登录->合并购物车->清空离线购物车
+                for (CartItem cartItem : items) {
+                    addItemToCart(cartItem.getSkuId().toString(),cartItem.getCount());  // 合并购物车
+                }
+                deleteCart(cart_prefix+ user.getUserKey());  // 清空离线购物车
+                items = getCartItems(cart_prefix + userId);   // 获取合并后的购物车内容
+            }
+        }
+        cart.setItems(items);
+
+        return cart;
+    }
+
     /**
-     * 获取购物车
+     * 删除购物车
+     *
+     * @param key user key
+     */
+    private void deleteCart(String key) {
+        redisTemplate.delete(key);
+    }
+
+    /**
+     * 根据购物项的key,获取对应购物项
+     *
+     * @param key 关键
+     * @return {@link List<CartItem>}
+     */
+    private List<CartItem> getCartItems(String key) {
+        BoundHashOperations<String, Object, Object> ops = redisTemplate.boundHashOps(key);
+        List<Object> values = ops.values();
+        if (values != null && values.size() > 0)
+            return values.stream()
+                    .map(s -> (CartItem) s)
+                    .collect(Collectors.toList());
+        return null;
+    }
+
+    /**
+     * 获取购物车的hash ops
      *
      * @return {@link BoundHashOperations<String, Object, Object>}
      */

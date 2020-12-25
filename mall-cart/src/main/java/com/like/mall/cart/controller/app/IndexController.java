@@ -1,8 +1,8 @@
 package com.like.mall.cart.controller.app;
 
 import com.like.mall.cart.service.CartService;
+import com.like.mall.cart.vo.Cart;
 import com.like.mall.cart.vo.CartItem;
-import com.like.mall.cart.vo.UserInfo;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,8 +11,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.Resource;
 import java.util.concurrent.ExecutionException;
-
-import static com.like.mall.cart.interceptor.CartInterceptor.userInfoLocal;
 
 /**
  * @author like
@@ -25,19 +23,20 @@ public class IndexController {
     @Resource
     CartService cartService;
 
+
     @GetMapping("/addToCart")
     public String addToCart(@RequestParam String skuId, @RequestParam Integer num, RedirectAttributes attributes) throws ExecutionException, InterruptedException {
         // 保存购物项
-        cartService.addToCart(skuId, num);
-        attributes.addAttribute("skuId",skuId);
-        return  "redirect:http:/localhost:7788/success.html";
+        cartService.addItemToCart(skuId, num);
+        attributes.addAttribute("skuId", skuId);
+        return "redirect:http:/localhost:7788/success.html";
     }
 
     @GetMapping("/success.html")
-    public  String successHtml(@RequestParam String skuId,Model model){
+    public String successHtml(@RequestParam String skuId, Model model) {
         // 获取购物项
         CartItem item = cartService.getCartItem(skuId);
-        model.addAttribute("item",item);
+        model.addAttribute("item", item);
         return "success";
     }
 
@@ -51,9 +50,10 @@ public class IndexController {
      * @return {@link String}
      */
     @GetMapping("/cartList.html")
-    public String cartList() {
+    public String cartList(Model model) throws ExecutionException, InterruptedException {
         // 获取当前登录用户的信息
-        UserInfo userinfo = userInfoLocal.get();
+        Cart cart = cartService.getCart();
+        model.addAttribute("cart",cart);
         return "cartList";
     }
 
