@@ -2,7 +2,6 @@ package com.like.mall.cart.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
 import com.like.mall.cart.feign.ProductFeignService;
 import com.like.mall.cart.interceptor.CartInterceptor;
 import com.like.mall.cart.service.CartService;
@@ -83,30 +82,32 @@ public class CartServiceImpl implements CartService {
     @Override
     public CartItem getCartItem(String skuId) {
         BoundHashOperations<String, Object, Object> ops = getCartOps();
-        String s = (String) ops.get(JSON.toJSONString(skuId));
-        return JSON.parseObject(s, new TypeReference<CartItem>() {});
+        return BeanUtil.toBean(ops.get(JSON.toJSONString(skuId)), CartItem.class);
     }
 
     @Override
     public Cart getCart() throws ExecutionException, InterruptedException {
         UserInfo user = CartInterceptor.userInfoLocal.get();
+        System.out.println(user);
         Cart cart = new Cart();
 
         // 1.获取离线购物车
-        List<CartItem> items = getCartItems(cart_prefix+user.getUserKey());
+        List<CartItem> items = getCartItems(cart_prefix + user.getUserKey());
         // 判断离线购物车中是否有内容
-        if (items != null && items.size() > 0) {
-            // 2.获取登录购物车
-            Long userId = user.getUserId();
-            if (userId != null) {
-                // 3.用戶已经登录->合并购物车->清空离线购物车
+
+        // 2.获取登录购物车
+        Long userId = user.getUserId();
+        if (userId != null) {
+            // 3.用戶已经登录->合并购物车->清空离线购物车
+            if (items != null && items.size() > 0) {
                 for (CartItem cartItem : items) {
-                    addItemToCart(cartItem.getSkuId().toString(),cartItem.getCount());  // 合并购物车
+                    addItemToCart(cartItem.getSkuId().toString(), cartItem.getCount());  // 合并购物车
                 }
-                deleteCart(cart_prefix+ user.getUserKey());  // 清空离线购物车
-                items = getCartItems(cart_prefix + userId);   // 获取合并后的购物车内容
             }
+            deleteCart(cart_prefix + user.getUserKey());  // 清空离线购物车
+            items = getCartItems(cart_prefix + userId);   // 获取合并后的购物车内容
         }
+
         cart.setItems(items);
 
         return cart;

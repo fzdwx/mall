@@ -29,7 +29,7 @@ public class IndexController {
         // 保存购物项
         cartService.addItemToCart(skuId, num);
         attributes.addAttribute("skuId", skuId);
-        return "redirect:http:/localhost:7788/success.html";
+        return "redirect:http://localhost:7788/success.html";
     }
 
     @GetMapping("/success.html")
