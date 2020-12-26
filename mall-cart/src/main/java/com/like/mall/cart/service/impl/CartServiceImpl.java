@@ -88,7 +88,6 @@ public class CartServiceImpl implements CartService {
     @Override
     public Cart getCart() throws ExecutionException, InterruptedException {
         UserInfo user = CartInterceptor.userInfoLocal.get();
-        System.out.println(user);
         Cart cart = new Cart();
 
         // 1.获取离线购物车
@@ -111,6 +110,14 @@ public class CartServiceImpl implements CartService {
         cart.setItems(items);
 
         return cart;
+    }
+
+    @Override
+    public void checkItem(Long skuId, Integer check) {
+        BoundHashOperations<String, Object, Object> ops = getCartOps();
+        CartItem item = getCartItem(skuId.toString());
+        item.setCheck(check==1);
+        getCartOps().put(JSON.toJSONString(skuId.toString()),JSON.toJSONString(item)); // 保存
     }
 
     /**

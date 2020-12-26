@@ -24,4 +24,12 @@ public interface CartService {
     CartItem getCartItem(String skuId);
 
     Cart getCart() throws ExecutionException, InterruptedException;
+
+    /**
+     * 改变选择状态
+     *
+     * @param skuId sku id
+     * @param check 检查
+     */
+    void checkItem(Long skuId, Integer check);
 }
