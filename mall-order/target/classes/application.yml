@@ -2,6 +2,8 @@ server:
   port: 9000
 
 spring:
+  session:
+    store-type: redis
   rabbitmq:
     host: 47.112.150.204
     port: 5672
@@ -35,3 +37,10 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto
+
+
+thread:
+  pool:
+    core-size: 20
+    max-size: 200
+    keep-alive: 10
