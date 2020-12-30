@@ -2,6 +2,10 @@ server:
   port: 9000
 
 spring:
+  rabbitmq:
+    host: 47.112.150.204
+    port: 5672
+    virtual-host: /
   # 数据源
   datasource:
     username: root
