@@ -28,6 +28,8 @@ spring:
   application:
     name: mall-order
   # mybatis设置
+  redis:
+    host: 47.112.150.204
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml
   global-config:
