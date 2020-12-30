@@ -6,6 +6,7 @@ spring:
     host: 47.112.150.204
     port: 5672
     virtual-host: /
+    publisher-confirms: true
   # 数据源
   datasource:
     username: root
