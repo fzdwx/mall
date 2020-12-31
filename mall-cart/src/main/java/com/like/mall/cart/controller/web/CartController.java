@@ -4,6 +4,7 @@ import com.like.mall.cart.service.CartService;
 import com.like.mall.cart.vo.CartItem;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.websocket.server.PathParam;
@@ -22,6 +23,7 @@ public class CartController {
     private CartService cartService;
 
     @GetMapping("/getUserCartItems")
+    @ResponseBody
     public List<CartItem> getUserCartItems() {
         return cartService.getUserCartItems();
     }
