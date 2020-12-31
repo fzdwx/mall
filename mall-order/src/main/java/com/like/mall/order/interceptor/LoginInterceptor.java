@@ -24,7 +24,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         HttpSession session = request.getSession();
         MemberVo user = (MemberVo) session.getAttribute(AuthConstant.LOGIN_USER);
         if (user == null) {
-            response.sendRedirect("http://locahost:7777");  // 没有登录
+            response.sendRedirect("http://localhost:7777/login.html");  // 没有登录
         } else {
             loginUser.set(user);
         }
