@@ -1,7 +1,12 @@
 package com.like.mall.order.controller;
 
+import com.like.mall.order.service.OrderService;
+import com.like.mall.order.vo.OrderConfirmVo;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import javax.annotation.Resource;
 
 /**
  * @author like
@@ -12,13 +17,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class HelloController {
 
+    @Resource
+    private OrderService orderService;
+
     /**
      * 去结算
      *
      * @return {@link String}
      */
     @GetMapping("/toTrade")
-    public String toTrade()  {
+    public String toTrade(Model model) {
+        // 展示订单确认的数据
+        OrderConfirmVo vs = orderService.confirmOrder();
+        model.addAttribute("orderConfirm",vs);
         return "confirm";
     }
 

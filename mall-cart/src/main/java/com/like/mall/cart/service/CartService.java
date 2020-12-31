@@ -3,6 +3,7 @@ package com.like.mall.cart.service;
 import com.like.mall.cart.vo.Cart;
 import com.like.mall.cart.vo.CartItem;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -32,4 +33,6 @@ public interface CartService {
      * @param check 检查
      */
     void checkItem(Long skuId, Integer check);
+
+    List<CartItem> getUserCartItems();
 }

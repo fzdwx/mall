@@ -116,8 +116,22 @@ public class CartServiceImpl implements CartService {
     public void checkItem(Long skuId, Integer check) {
         BoundHashOperations<String, Object, Object> ops = getCartOps();
         CartItem item = getCartItem(skuId.toString());
-        item.setCheck(check==1);
-        getCartOps().put(JSON.toJSONString(skuId.toString()),JSON.toJSONString(item)); // 保存
+        item.setCheck(check == 1);
+        getCartOps().put(JSON.toJSONString(skuId.toString()), JSON.toJSONString(item)); // 保存
+    }
+
+    @Override
+    public List<CartItem> getUserCartItems() {
+        UserInfo user = CartInterceptor.userInfoLocal.get();
+        String key = cart_prefix + user.getUserId();
+        List<CartItem> list = getCartItems(key);
+        return list == null ? null : list
+                .stream()
+                // 更新为最新价格
+                .peek(s -> s.setPrice(productFeignService.getPrice(s.getSkuId())))
+                .filter(CartItem::getCheck)
+                .collect(Collectors.toList());
+
     }
 
     /**

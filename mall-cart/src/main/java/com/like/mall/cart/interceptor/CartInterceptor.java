@@ -26,7 +26,6 @@ public class CartInterceptor implements HandlerInterceptor {
 
     // 共享数据
     public static ThreadLocal<UserInfo> userInfoLocal = new ThreadLocal<>();
-
     /**
      * 方法执行前
      */
