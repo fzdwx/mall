@@ -53,7 +53,9 @@ public class Cart {
         BigDecimal count = new BigDecimal(0);
         if (items != null && items.size() > 0) {
             for (CartItem item : items) {
-                count = count.add(item.getTotalPrice());
+                if (item.getCheck()) {
+                    count = count.add(item.getTotalPrice());
+                }
             }
         }
         count = count.subtract(reduce);
