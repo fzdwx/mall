@@ -12,6 +12,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class HelloController {
 
+    /**
+     * 去结算
+     *
+     * @return {@link String}
+     */
+    @GetMapping("/toTrade")
+    public String toTrade()  {
+        return "confirm";
+    }
 
     @GetMapping("list.html")
     public String page() {
