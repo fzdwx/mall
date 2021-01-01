@@ -16,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.like.mall.order.interceptor.LoginInterceptor.loginUser;
 
@@ -27,6 +30,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     CartFeignService cartFeignService;
     @Autowired
     private MemberFeignService memberFeignService;
+    @Autowired
+    private ThreadPoolExecutor executor;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -43,12 +48,20 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         MemberVo user = loginUser.get();
         OrderConfirmVo vo = new OrderConfirmVo();
         // 远程查询用户的地址
-        vo.setAddresses(memberFeignService.getUserAddress(user.getId()));
+        CompletableFuture<Void> getAddress = CompletableFuture.runAsync(() -> {
+            vo.setAddresses(memberFeignService.getUserAddress(user.getId()));
+        }, executor);
         // 远程查询获取当前购物项信息
-        vo.setItems(cartFeignService.getUserCartItems());
+        CompletableFuture<Void> getCartItems = CompletableFuture.runAsync(() -> {
+            vo.setItems(cartFeignService.getUserCartItems());
+        }, executor);
         // 设置用户积分
         vo.setIntegration(user.getIntegration());
-
+        try {
+            CompletableFuture.allOf(getCartItems, getAddress).get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
         vo.setTotal(vo.getTotal());
         vo.setPayPrice(vo.getPayPrice());
 
