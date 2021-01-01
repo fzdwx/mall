@@ -24,9 +24,17 @@ public class OrderConfirmVo {
     // 應付的金額
     private BigDecimal payPrice;
     //    发票记录
-
     // 防重复令牌
     private String orderToken;
+    private int count = 0;
+
+    public Integer getCount() {
+        for (OrderItemVo i : items) {
+            count += i.getCount();
+        }
+        return count;
+    }
+
     public BigDecimal getTotal() {
         total = new BigDecimal(0);
         if (items == null) return total;

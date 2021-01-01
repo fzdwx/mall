@@ -72,7 +72,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         }
         vo.setTotal(vo.getTotal());
         vo.setPayPrice(vo.getPayPrice());
-
+        vo.setCount(vo.getCount());
         // TODO: 2020/12/31    防重复令牌
         return vo;
 
