@@ -21,6 +21,7 @@ public class FeignConfig {
     public RequestInterceptor requestInterceptor() {
         return template -> {
             ServletRequestAttributes reqA = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (reqA == null) return;
             HttpServletRequest request = reqA.getRequest();
             // 同步请求头
             template.header("Cookie", request.getHeader("Cookie"));
