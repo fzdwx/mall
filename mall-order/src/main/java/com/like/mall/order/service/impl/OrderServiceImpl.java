@@ -14,6 +14,8 @@ import com.like.mall.order.service.OrderService;
 import com.like.mall.order.vo.OrderConfirmVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -47,12 +49,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     public OrderConfirmVo confirmOrder() {
         MemberVo user = loginUser.get();
         OrderConfirmVo vo = new OrderConfirmVo();
+
+        // 解决feign异步请求头丢失问题
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+
         // 远程查询用户的地址
         CompletableFuture<Void> getAddress = CompletableFuture.runAsync(() -> {
             vo.setAddresses(memberFeignService.getUserAddress(user.getId()));
+            RequestContextHolder.setRequestAttributes(requestAttributes);
         }, executor);
         // 远程查询获取当前购物项信息
         CompletableFuture<Void> getCartItems = CompletableFuture.runAsync(() -> {
+            RequestContextHolder.setRequestAttributes(requestAttributes);
             vo.setItems(cartFeignService.getUserCartItems());
         }, executor);
         // 设置用户积分
