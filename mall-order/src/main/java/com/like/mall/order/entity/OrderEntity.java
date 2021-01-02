@@ -2,11 +2,11 @@ package com.like.mall.order.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-
-import java.math.BigDecimal;
-import java.io.Serializable;
-import java.util.Date;
 import lombok.Data;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * 订单
@@ -132,7 +132,7 @@ public class OrderEntity implements Serializable {
 	/**
 	 * 收货人电话
 	 */
-	private String receiverPhone;
+	private Long receiverPhone;
 	/**
 	 * 收货人邮编
 	 */

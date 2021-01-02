@@ -13,6 +13,7 @@ import java.util.List;
  */
 @Data
 public class OrderConfirmVo {
+    private MemberAddrVo addr;
     // 用户收货地址
     private List<MemberAddrVo> addresses;
     // 所有选中的购物项
@@ -27,6 +28,15 @@ public class OrderConfirmVo {
     // 防重复令牌
     private String orderToken;
     private int count = 0;
+
+    public MemberAddrVo getAddr() {
+//        for (MemberAddrVo address : addresses) {
+//            if (address.getDefaultStatus() == 1) {
+//                return address;
+//            }
+//        }
+        return addresses.get(0);
+    }
 
     public Integer getCount() {
         for (OrderItemVo i : items) {

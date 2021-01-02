@@ -2,6 +2,7 @@ package com.like.mall.ware.controller;
 
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.R;
+import com.like.mall.common.vo.WareSkuLockVo;
 import com.like.mall.ware.entity.WareSkuEntity;
 import com.like.mall.ware.service.WareSkuService;
 import com.like.mall.ware.vo.SkuStockVo;
@@ -27,6 +28,16 @@ public class WareSkuController {
     @Autowired
     private WareSkuService wareSkuService;
 
+    @PostMapping("/lock/order")
+    public Boolean orderLockStock(@RequestBody WareSkuLockVo vo) {
+        try {
+            Boolean b = wareSkuService.orderLockStock(vo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
     // 查询sku是否有库存
     @PostMapping("/hasStock")
     public  List<SkuStockVo> skuHasStock(@RequestBody List<Long> skuIds) {

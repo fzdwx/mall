@@ -22,7 +22,7 @@ public class MemberAddrVo {
     /**
      * 电话
      */
-    private String phone;
+    private Long phone;
     /**
      * 邮政编码
      */

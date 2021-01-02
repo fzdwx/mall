@@ -587,8 +587,14 @@
     <div class="yfze">
         <p class="yfze_a"><span class="z">应付总额：</span><span class="hq" th:text="${orderConfirm.payPrice}">￥28.90</span></p>
         <p class="yfze_b">寄送至： like </p>
+
     </div>
-    <button class="tijiao">提交订单</button>
+    <form action="http://localhost:9000/submitOrder" method="post">
+        <input type="hidden" name="addr" th:value="${orderConfirm.addr}">
+        <input type="hidden" name="orderToken" th:value="${orderConfirm.orderToken}">
+        <input type="hidden" name="payPrice" th:value="${orderConfirm.payPrice}">
+    <button class="tijiao" type="submit">提交订单</button>
+    </form>
 </div>
 </div>
 

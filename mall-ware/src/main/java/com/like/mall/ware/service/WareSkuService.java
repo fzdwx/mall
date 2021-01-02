@@ -2,6 +2,7 @@ package com.like.mall.ware.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.like.mall.common.utils.PageUtils;
+import com.like.mall.common.vo.WareSkuLockVo;
 import com.like.mall.ware.entity.WareSkuEntity;
 import com.like.mall.ware.vo.SkuStockVo;
 
@@ -22,5 +23,7 @@ public interface WareSkuService extends IService<WareSkuEntity> {
     void addStock(Long skuId, Long wareId, Integer skuNum);
 
     List<SkuStockVo> skuHasStock(List<Long> skuIds);
+
+    Boolean orderLockStock(WareSkuLockVo vo);
 }
 
