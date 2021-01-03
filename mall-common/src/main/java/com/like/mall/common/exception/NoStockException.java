@@ -1,4 +1,4 @@
-package com.like.mall.ware.exception;
+package com.like.mall.common.exception;
 
 /**
  * @author like

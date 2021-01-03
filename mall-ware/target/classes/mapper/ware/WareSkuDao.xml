@@ -2,8 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.like.mall.ware.dao.WareSkuDao">
-
-	<!-- 可根据自己的需求，是否要使用 -->
+    <!-- 可根据自己的需求，是否要使用 -->
     <resultMap type="com.like.mall.ware.entity.WareSkuEntity" id="wareSkuMap">
         <result property="id" column="id"/>
         <result property="skuId" column="sku_id"/>
@@ -12,15 +11,29 @@
         <result property="skuName" column="sku_name"/>
         <result property="stockLocked" column="stock_locked"/>
     </resultMap>
-    <insert id="addStock" >
-        update   `mall-ware`.`wms_ware_sku`
-        set  stock = stock +#{skuNum}
-        where sku_id= #{skuId} and ware_id = #{wareId}
+    <insert id="addStock">
+        update `mall-ware`.`wms_ware_sku`
+        set stock = stock + #{skuNum}
+        where sku_id = #{skuId}
+          and ware_id = #{wareId}
     </insert>
     <select id="getSkuStock" resultType="java.lang.Long">
-        select sum(stock - stock_locked) from `mall-ware`.wms_ware_sku wws
+        select sum(stock - stock_locked)
+        from `mall-ware`.wms_ware_sku wws
         where sku_id = #{i}
     </select>
 
+    <select id="listWareIdHasSkuStock" resultType="java.lang.Long">
+        select ware_id
+        from `mall-ware`.wms_ware_sku
+        where sku_id = #{skuId}
+          and stock - stock_locked > #{count};
+    </select>
 
+    <update id="lockSkuStock">
+        update `mall-ware`.wms_ware_sku
+        set stock_locked = stock_locked + #{count}
+        where sku_id = #{skuId}
+          and ware_id = #{wareId}
+    </update>
 </mapper>

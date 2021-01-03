@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.like.mall.common.constant.OrderConstant;
+import com.like.mall.common.exception.NoStockException;
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.Query;
 import com.like.mall.common.vo.MemberVo;
@@ -142,6 +143,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                 respVo.setCode(0);
             } else {
                 respVo.setCode(1);
+                throw new NoStockException(0L);
             }
             respVo.setOrder(order.getOrder());
         }
