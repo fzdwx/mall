@@ -1,15 +1,14 @@
 package com.like.mall.order.config;
 
 import com.like.mall.order.entity.OrderEntity;
+import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.Exchange;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,8 +23,9 @@ import java.util.Map;
 public class MQConfig {
 
     @RabbitListener(queues = "order.release.order.queue")
-    public void listener(OrderEntity order) {
+    public void listener(OrderEntity order, Channel channel, Message message) throws IOException {
       log.error("收到过期的订单信息：准备关闭订单{}"+order.getOrderSn());
+      channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
     }
 
     @Bean //创建一个死信队列

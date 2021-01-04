@@ -5,12 +5,15 @@ import com.like.mall.order.service.OrderService;
 import com.like.mall.order.vo.OrderConfirmVo;
 import com.like.mall.order.vo.OrderSubmitRespVo;
 import com.like.mall.order.vo.OrderSubmitVo;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.util.Date;
 
 /**
  * @author like
@@ -22,11 +25,18 @@ import javax.annotation.Resource;
 public class HelloController {
 
     @Resource
+    RabbitTemplate rabbitTemplate;
+
+    @Resource
     private OrderService orderService;
 
+    @ResponseBody
+    @GetMapping("/createOrderTest")
     public String createOrderTest() {
         OrderEntity order = new OrderEntity();
         order.setOrderSn("sn:test");
+        order.setModifyTime(new Date());
+        rabbitTemplate.convertAndSend("order-event-exchange","order.create.order",order);
         return "ok";
     }
 
