@@ -15,6 +15,8 @@ spring:
     listener:
       simple:
         acknowledge-mode: manual        # 设置消费者端，手动确认机制
+    username: guest
+    password: guest
   # 数据源
   datasource:
     username: root
@@ -27,6 +29,9 @@ spring:
       # 注册地址
       discovery:
         server-addr:  47.112.150.204:8848
+    alibaba:
+      seata:
+        tx-service-group: mall-order-fescar-service-group
   application:
     name: mall-order
   # mybatis设置

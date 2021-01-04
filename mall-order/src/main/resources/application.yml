@@ -15,6 +15,8 @@ spring:
     listener:
       simple:
         acknowledge-mode: manual        # 设置消费者端，手动确认机制
+    username: guest
+    password: guest
   # 数据源
   datasource:
     username: root

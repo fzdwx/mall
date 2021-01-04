@@ -1,5 +1,6 @@
 package com.like.mall.order.controller;
 
+import com.like.mall.order.entity.OrderEntity;
 import com.like.mall.order.service.OrderService;
 import com.like.mall.order.vo.OrderConfirmVo;
 import com.like.mall.order.vo.OrderSubmitRespVo;
@@ -23,10 +24,14 @@ public class HelloController {
     @Resource
     private OrderService orderService;
 
+    public String createOrderTest() {
+        OrderEntity order = new OrderEntity();
+        order.setOrderSn("sn:test");
+        return "ok";
+    }
+
     /**
      * 去结算
-     *
-     * @return {@link String}
      */
     @GetMapping("/toTrade")
     public String toTrade(Model model) {
@@ -38,9 +43,6 @@ public class HelloController {
 
     /**
      * 提交订单
-     *
-     * @param vo 签证官
-     * @return {@link String}
      */
     @PostMapping(value = "/submitOrder")
     public String submitOrder( OrderSubmitVo vo) {
