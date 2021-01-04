@@ -1,5 +1,6 @@
 package com.like.mall.product;
 
+import io.seata.config.springcloud.EnableSeataSpringConfig;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,6 +13,7 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 @EnableFeignClients
 @MapperScan("com.like.mall.product.dao")
 @EnableRedisHttpSession
+@EnableSeataSpringConfig
 public class MallProductApplication {
 
     public static void main(String[] args) {
