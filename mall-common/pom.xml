@@ -67,6 +67,10 @@
             <artifactId>spring-boot-devtools</artifactId>
         </dependency>
         <!--微服务-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
+        </dependency>
         <!--nacos服务发现-->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>

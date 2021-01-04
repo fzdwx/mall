@@ -18,6 +18,7 @@ import com.like.mall.product.feign.EsFeignService;
 import com.like.mall.product.feign.WareFeignService;
 import com.like.mall.product.service.*;
 import com.like.mall.product.vo.*;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -45,7 +46,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         return new PageUtils(page);
     }
 
-
+    @GlobalTransactional // seata AT 分布式事务
     @Override
     @Transactional
     public void saveSpuInfo(SpuSaveVo vo) {

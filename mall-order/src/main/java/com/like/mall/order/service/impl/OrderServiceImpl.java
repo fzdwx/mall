@@ -22,6 +22,7 @@ import com.like.mall.order.feign.WareFeignService;
 import com.like.mall.order.service.OrderItemService;
 import com.like.mall.order.service.OrderService;
 import com.like.mall.order.vo.*;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -100,13 +101,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         vo.setPayPrice(vo.getPayPrice());
         vo.setCount(vo.getCount());
         // 防重复令牌
-        String token = UUID.randomUUID().toString().substring(0,5);
+        String token = UUID.randomUUID().toString().substring(0, 5);
         vo.setOrderToken(token);  // 保存到页面
         redisTemplate.opsForValue().set(OrderConstant.orderTokenPrefix + user.getId(), token, 30, TimeUnit.MINUTES); // 保存到redis
         return vo;
 
     }
 
+    @GlobalTransactional // 高并发
     @Override
     @Transactional  // 事务
     public OrderSubmitRespVo submitOrder(OrderSubmitVo vo) {
@@ -126,22 +128,25 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         if (execute != null && execute == 1) {  // 验证成功 -> 执行业务
             // 1.创建订单
             OrderCreateTo order = createOrder(vo);
-            // 2.计算价格是否相等 todo
+            // todo 2.计算价格是否相等
             // 3.保存订单
             saveOrder(order);
             // 4.库存锁定
             WareSkuLockVo lockVo = new WareSkuLockVo();
             lockVo.setOrderSn(order.getOrder().getOrderSn());  // 封装需要锁定的数据
-            lockVo.setLocks(order.getOrderItems().stream().map(s->{
+            lockVo.setLocks(order.getOrderItems().stream().map(s -> {
                 WareSkuLockVo.OrderItemVo orderItemVo = new WareSkuLockVo.OrderItemVo();
                 orderItemVo.setCount(s.getSkuQuantity());
-                BeanUtils.copyProperties(s,orderItemVo);
+                BeanUtils.copyProperties(s, orderItemVo);
                 return orderItemVo;
             }).collect(Collectors.toList()));
-            Boolean lock = wareFeignService.orderLockStock(lockVo);// 调用远程接口
+            // 调用远程接口
+            Boolean lock = wareFeignService.orderLockStock(lockVo);
             if (lock) {
                 respVo.setCode(0);
-            } else {
+                // todo 5.调用远程服务扣减积分 出现异常
+                int i = 10 / 0;
+            } else { // 锁定失败
                 respVo.setCode(1);
                 throw new NoStockException(0L);
             }

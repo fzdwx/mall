@@ -27,6 +27,9 @@ spring:
       # 注册地址
       discovery:
         server-addr:  47.112.150.204:8848
+    alibaba:
+      seata:
+        tx-service-group: mall-order-fescar-service-group
   application:
     name: mall-order
   # mybatis设置
