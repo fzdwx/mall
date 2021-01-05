@@ -1,5 +1,6 @@
 package com.like.mall.order.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.R;
 import com.like.mall.order.entity.OrderEntity;
@@ -23,6 +24,12 @@ import java.util.Map;
 public class OrderController {
     @Autowired
     private OrderService orderService;
+
+    @GetMapping("/status/{orderSn}")
+    public Integer getOrderStatus(@PathVariable String orderSn) {
+        OrderEntity order = orderService.getOne(new QueryWrapper<OrderEntity>().eq("order_sn", orderSn));
+        return order == null ? null : order.getStatus();
+    }
 
     /**
      * 列表

@@ -22,7 +22,6 @@ import com.like.mall.order.feign.WareFeignService;
 import com.like.mall.order.service.OrderItemService;
 import com.like.mall.order.service.OrderService;
 import com.like.mall.order.vo.*;
-import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -108,7 +107,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     }
 
-    @GlobalTransactional // 高并发
+//    @GlobalTransactional // 高并发下不适用，全局锁
     @Override
     @Transactional  // 事务
     public OrderSubmitRespVo submitOrder(OrderSubmitVo vo) {

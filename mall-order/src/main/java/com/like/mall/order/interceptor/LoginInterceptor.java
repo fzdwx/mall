@@ -3,6 +3,7 @@ package com.like.mall.order.interceptor;
 import com.like.mall.common.constant.AuthConstant;
 import com.like.mall.common.vo.MemberVo;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,6 +22,9 @@ public class LoginInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        if (new AntPathMatcher().match("/order/order/status/**",request.getRequestURI())) {
+            return true;
+        }
         HttpSession session = request.getSession();
         MemberVo user = (MemberVo) session.getAttribute(AuthConstant.LOGIN_USER);
         if (user == null) {

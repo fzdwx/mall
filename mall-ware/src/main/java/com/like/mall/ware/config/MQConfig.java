@@ -1,8 +1,10 @@
 package com.like.mall.ware.config;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.Exchange;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -18,11 +20,6 @@ import java.util.Map;
 @Component
 @Slf4j
 public class MQConfig {
-
-    @RabbitListener(queues = "stock.release.stock.queue")
-    public void handler(Message message) {
-
-    }
 
     @Bean  // 库存服务的交换机
     public Exchange stockExchange() {

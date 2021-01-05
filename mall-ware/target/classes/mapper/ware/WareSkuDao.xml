@@ -36,4 +36,11 @@
         where sku_id = #{skuId}
           and ware_id = #{wareId}
     </update>
+
+    <update id="unLock">
+        update `mall-ware`.wms_ware_sku
+        set stock_locked = stock_locked - #{skuNum}
+        where sku_id = #{skuId}
+          and ware_id = #{wareId}
+    </update>
 </mapper>
