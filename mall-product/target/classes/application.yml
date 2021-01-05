@@ -14,9 +14,9 @@ spring:
       # 注册地址
       discovery:
         server-addr:  47.112.150.204:8848
-    alibaba:
-      seata:
-        tx-service-group: mall-product-fescar-service-group
+#    alibaba:
+#      seata:
+#        tx-service-group: mall-product-fescar-service-group
   application:
     name: mall-product
   jackson:
