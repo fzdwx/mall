@@ -163,12 +163,12 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
      * 库存自动解锁
      * 1.下单成功，锁定也成功，但是order服务后面的应用调用出错，执行解锁
      * 2.锁库存失败
-     *      - 当前订单是否存在
-     *          - 没有 -> 必须解锁
-     *          - 有
-     *              - 查看订单状态
-     *                  - 取消 -> 解锁库存
-     *                  - 没取消，不解锁
+     * - 当前订单是否存在
+     * - 没有 -> 必须解锁
+     * - 有
+     * - 查看订单状态
+     * - 取消 -> 解锁库存
+     * - 没取消，不解锁
      */
     @Override
     public void unLock(StockLocked info) {
@@ -178,15 +178,20 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             String orderSn = wareOrderTaskService.getById(info.getId()).getOrderSn();
             // 3.远程查看订单状态 【0->待付款；1->待发货；2->已发货；3->已完成；4->已关闭；5->无效订单】
             Integer orderStatus = orderFeignService.getOrderStatus(orderSn);
-            if (orderStatus == null || orderStatus == 4) { //订单不存在 取消，解锁库存
+            if (orderStatus == null || orderStatus == 4 || orderStatus == 1) { //订单不存在 取消，解锁库存
                 unLockStock(info.getDetailId(), info.getWareId(), info.getSkuId(), info.getSkuNum());
-                // TODO: 2021/1/5 修改orderTask的状态
             }
         }
     }
 
     protected void unLockStock(Long taskDetailId, Long wareId, Long skuId, Integer skuNum) {
+        // 1.库存解锁
         wareSkuDao.unLock(wareId, skuId, skuNum);
+        // 2.更新状态
+        WareOrderTaskDetailEntity newTask = new WareOrderTaskDetailEntity();
+        newTask.setTaskId(taskDetailId);
+        newTask.setLockStatus(2); // 已解锁
+        wareOrderTaskDetailService.updateById(newTask);
     }
 
     private List<Long> listWareIdHasSkuStock(Long skuId, Integer count) {

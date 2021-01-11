@@ -57,3 +57,6 @@ thread:
     core-size: 20
     max-size: 200
     keep-alive: 10
+feign:
+  httpclient:
+    connection-timeout: 30000

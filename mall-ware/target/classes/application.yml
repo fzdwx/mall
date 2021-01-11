@@ -6,9 +6,9 @@ spring:
     host: 47.112.150.204
     port: 5672
     virtual-host: /
-    publisher-returns: true  # 开启发生端消息抵达队列的确认
-    template:
-      mandatory: true   # 只要抵达队列，以异步发送优先回调我们的 returns
+#    publisher-returns: true  # 开启发生端消息抵达队列的确认
+#    template:
+#      mandatory: true   # 只要抵达队列，以异步发送优先回调我们的 returns
     listener:
       simple:
         acknowledge-mode: manual        # 设置消费者端，手动确认机制
@@ -45,3 +45,6 @@ mybatis-plus:
 
   configuration:
     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+feign:
+  httpclient:
+    connection-timeout: 30000

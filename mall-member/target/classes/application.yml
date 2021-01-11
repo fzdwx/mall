@@ -27,3 +27,7 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto
+
+feign:
+  httpclient:
+    connection-timeout: 30000
