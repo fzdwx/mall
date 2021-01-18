@@ -3,6 +3,7 @@ package com.like.mall.ware.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.like.mall.common.To.mq.OrderTo;
 import com.like.mall.common.To.mq.StockLocked;
 import com.like.mall.common.exception.NoStockException;
 import com.like.mall.common.utils.PageUtils;
@@ -181,6 +182,23 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             if (orderStatus == null || orderStatus == 4 || orderStatus == 1) { //订单不存在 取消，解锁库存
                 unLockStock(info.getDetailId(), info.getWareId(), info.getSkuId(), info.getSkuNum());
             }
+        }
+    }
+
+    /**
+     * 防止订单服务卡顿，导致订单状态消息一直改不了，昆虫消息优先到期
+     * 导致卡顿的订单永远不能解锁库存
+     */
+    @Transactional
+    @Override
+    public void unLockStock(OrderTo info) {
+        String orderSn = info.getOrderSn();
+        WareOrderTaskEntity orderTask = wareOrderTaskService.getOrderByOrderSn(orderSn);// 查一下最新状态
+        Long id = orderTask.getId();
+        List<WareOrderTaskDetailEntity> tasks = wareOrderTaskDetailService.list(new QueryWrapper<WareOrderTaskDetailEntity>()
+                .eq("task_id", id).eq("lock_status", 1));
+        for (WareOrderTaskDetailEntity task : tasks) {
+            unLockStock(task.getId(),task.getWareId(), task.getSkuId(), task.getSkuNum());
         }
     }
 

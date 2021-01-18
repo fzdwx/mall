@@ -67,4 +67,16 @@ public class MQConfig {
                 "order.release.order.queue", Binding.DestinationType.QUEUE,
                 "order-event-exchange", "order.release.order", null);
     }
+
+    /**
+     * 訂單釋放直接和庫存釋放進行綁定
+     */
+    public Binding orderReleaseOtherBinding() {
+        System.out.println("创建绑定");
+        return new Binding(
+                "stock.release.stock.queue", Binding.DestinationType.QUEUE,
+                "order-event-exchange", "order.release.other.#", null);
+    }
+
+
 }

@@ -23,5 +23,7 @@ public interface OrderService extends IService<OrderEntity> {
     OrderConfirmVo confirmOrder();
 
     OrderSubmitRespVo submitOrder(OrderSubmitVo vo);
+
+    void closeOrder(OrderEntity order);
 }
 

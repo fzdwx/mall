@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.like.mall.common.To.mq.OrderTo;
 import com.like.mall.common.constant.OrderConstant;
 import com.like.mall.common.exception.NoStockException;
 import com.like.mall.common.utils.PageUtils;
@@ -22,6 +23,7 @@ import com.like.mall.order.feign.WareFeignService;
 import com.like.mall.order.service.OrderItemService;
 import com.like.mall.order.service.OrderService;
 import com.like.mall.order.vo.*;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -32,10 +34,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -50,6 +49,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Autowired
     CartFeignService cartFeignService;
+    @Autowired
+    RabbitTemplate rabbitTemplate;
     @Autowired
     private MemberFeignService memberFeignService;
     @Autowired
@@ -107,7 +108,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     }
 
-//    @GlobalTransactional // 高并发下不适用，全局锁
+    //    @GlobalTransactional // 高并发下不适用，全局锁
     @Override
     @Transactional  // 事务
     public OrderSubmitRespVo submitOrder(OrderSubmitVo vo) {
@@ -149,9 +150,29 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                 respVo.setCode(1);
                 throw new NoStockException(0L);
             }
-            respVo.setOrder(order.getOrder());
+            respVo.setOrder(order.getOrder()); // 订单创建完成
+            // 发送消息
+            rabbitTemplate.convertAndSend("order-event-exchange", "order.create.order", order.getOrder());
         }
         return respVo;
+    }
+
+    /**
+     * 关闭订单
+     */
+    @Override
+    public void closeOrder(OrderEntity order) {
+        OrderEntity dbOrder = getById(order.getId()); // 查询最新状态
+        if (Objects.equals(dbOrder.getStatus(), OrderConstant.CreateNew)) { // 待付款狀態
+            // 1、关闭订单
+            OrderEntity o = new OrderEntity();
+            o.setId(order.getId());
+            o.setStatus(OrderConstant.Cancled);
+            updateById(o);
+            // 2.发送给mq一个
+            OrderTo to = new OrderTo(dbOrder);
+            rabbitTemplate.convertAndSend("order-event-exchange","order.release.order",to);
+        }
     }
 
     private OrderEntity builderOrder(OrderSubmitVo vo, String orderSn) {
