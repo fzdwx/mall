@@ -71,6 +71,7 @@ public class MQConfig {
     /**
      * 訂單釋放直接和庫存釋放進行綁定
      */
+    @Bean
     public Binding orderReleaseOtherBinding() {
         System.out.println("创建绑定");
         return new Binding(
