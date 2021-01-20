@@ -32,6 +32,10 @@ public class RabbitMQConfig {
     public void initRabbitTemplate() {
         // 设置确认回调
         rabbitTemplate.setConfirmCallback(new RabbitTemplate.ConfirmCallback() {
+            /**
+             * 1.做好消息确认机制：手动ACK
+             * 2.每一个发送的消息都在数据库做好记录，定期将失败的消息再次发送
+             */
             @Override
             public void confirm(CorrelationData correlationData, boolean ack, String cause) {
                 System.out.println("confirm{correlationData:" + correlationData + ",ack:" + ack + ",cause:" + cause);

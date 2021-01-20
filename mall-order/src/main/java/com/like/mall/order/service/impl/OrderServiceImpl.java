@@ -171,7 +171,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             updateById(o);
             // 2.发送给mq一个
             OrderTo to = new OrderTo(dbOrder);
-            rabbitTemplate.convertAndSend("order-event-exchange","order.release.order",to);
+            try {
+                // TODO: 2021/1/18 保证消息一定可以发送出去
+                rabbitTemplate.convertAndSend("order-event-exchange", "order.release.order", to);
+            } catch (Exception e) {
+
+            }
         }
     }
 
