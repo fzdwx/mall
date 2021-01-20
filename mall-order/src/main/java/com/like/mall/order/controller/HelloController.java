@@ -36,7 +36,7 @@ public class HelloController {
         OrderEntity order = new OrderEntity();
         order.setOrderSn("sn:test");
         order.setModifyTime(new Date());
-        rabbitTemplate.convertAndSend("order-event-exchange","order.create.order",order);
+        rabbitTemplate.convertAndSend("order-event-exchange", "order.create.order", order);
         return "ok";
     }
 
@@ -55,12 +55,13 @@ public class HelloController {
      * 提交订单
      */
     @PostMapping(value = "/submitOrder")
-    public String submitOrder( OrderSubmitVo vo) {
+    public String submitOrder(OrderSubmitVo vo,Model model) {
         // 创建订单，验证令牌，验证价格，锁库存
         OrderSubmitRespVo respVo = orderService.submitOrder(vo);
         if (respVo.getCode() != 0) {  // 失败
             return "redirect:http://localhost:9000/toTrade";
         }
+        model.addAttribute("order",respVo.getOrder());
         return "pay";
     }
 

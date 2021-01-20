@@ -34,6 +34,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -145,7 +146,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             if (lock) {
                 respVo.setCode(0);
                 // todo 5.调用远程服务扣减积分 出现异常
-                int i = 10 / 0;
+//                int i = 10 / 0;
             } else { // 锁定失败
                 respVo.setCode(1);
                 throw new NoStockException(0L);
@@ -179,6 +180,21 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             }
         }
     }
+
+    @Override
+    public PayVo getOrderPay(String orderSn) {
+        OrderEntity order = this.getOne(new QueryWrapper<OrderEntity>().eq("order_sn", orderSn));
+        List<OrderItemEntity> orderItems = orderItemService.list(new QueryWrapper<OrderItemEntity>().eq("order_sn", orderSn));
+
+        PayVo payVo = new PayVo();
+        payVo.setOut_trade_no(order.getOrderSn());
+        payVo.setSubject(orderItems.get(0).getSkuName());
+        payVo.setTotal_amount(order.getPayAmount().setScale(2, BigDecimal.ROUND_UP).toString());
+        payVo.setBody(order.getNote());
+
+        return payVo;
+    }
+
 
     private OrderEntity builderOrder(OrderSubmitVo vo, String orderSn) {
         MemberVo user = loginUser.get();

@@ -6,6 +6,7 @@ import com.like.mall.order.entity.OrderEntity;
 import com.like.mall.order.vo.OrderConfirmVo;
 import com.like.mall.order.vo.OrderSubmitRespVo;
 import com.like.mall.order.vo.OrderSubmitVo;
+import com.like.mall.order.vo.PayVo;
 
 import java.util.Map;
 
@@ -25,5 +26,13 @@ public interface OrderService extends IService<OrderEntity> {
     OrderSubmitRespVo submitOrder(OrderSubmitVo vo);
 
     void closeOrder(OrderEntity order);
+
+    /**
+     * 得到订单支付信息
+     *
+     * @param orderSn 订单sn
+     * @return {@link PayVo}
+     */
+    PayVo getOrderPay(String orderSn);
 }
 
