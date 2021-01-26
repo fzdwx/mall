@@ -17,11 +17,13 @@ import com.like.mall.order.To.OrderCreateTo;
 import com.like.mall.order.dao.OrderDao;
 import com.like.mall.order.entity.OrderEntity;
 import com.like.mall.order.entity.OrderItemEntity;
+import com.like.mall.order.entity.PaymentInfoEntity;
 import com.like.mall.order.feign.CartFeignService;
 import com.like.mall.order.feign.MemberFeignService;
 import com.like.mall.order.feign.WareFeignService;
 import com.like.mall.order.service.OrderItemService;
 import com.like.mall.order.service.OrderService;
+import com.like.mall.order.service.PaymentInfoService;
 import com.like.mall.order.vo.*;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
@@ -52,6 +54,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     CartFeignService cartFeignService;
     @Autowired
     RabbitTemplate rabbitTemplate;
+    @Autowired
+    private PaymentInfoService paymentInfoService;
     @Autowired
     private MemberFeignService memberFeignService;
     @Autowired
@@ -146,7 +150,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             if (lock) {
                 respVo.setCode(0);
                 // todo 5.调用远程服务扣减积分 出现异常
-//                int i = 10 / 0;
+                //                int i = 10 / 0;
             } else { // 锁定失败
                 respVo.setCode(1);
                 throw new NoStockException(0L);
@@ -193,6 +197,46 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         payVo.setBody(order.getNote());
 
         return payVo;
+    }
+
+    @Override
+    public PageUtils queryPageWithItem(Map<String, Object> params) {
+        MemberVo user = loginUser.get();
+        IPage<OrderEntity> page = this.page(
+                new Query<OrderEntity>().getPage(params),
+                new QueryWrapper<OrderEntity>()
+                        .eq("member_id", user.getId())
+                        .orderByDesc("id")
+        );
+        page.setRecords(
+                page.getRecords().stream().map(o -> {
+                    o.setItems(orderItemService.list(new QueryWrapper<OrderItemEntity>()
+                            .eq("order_sn", o.getOrderSn())));
+                    return o;
+                }).collect(Collectors.toList()));
+        return new PageUtils(page);
+    }
+
+    @Override
+    public Boolean handlerAlipayAsync(PayAsyncVo vo) {
+        // 1.保存流水
+        PaymentInfoEntity info = new PaymentInfoEntity();
+        info.setOrderSn(vo.getOut_trade_no());
+        info.setAlipayTradeNo(vo.getTrade_no());
+        info.setPaymentStatus(vo.getTrade_status());
+        info.setCallbackTime(new Date(vo.getNotify_time()));
+        paymentInfoService.save(info);
+
+        // 2.修改狀態
+        if (vo.getTrade_status().equals("TRADE_SUCCESS") || vo.getTrade_status().equals("TRADE_FINISHED")) {
+            String orderSn = vo.getOut_trade_no();
+            updateOrderStatus(orderSn,OrderConstant.PAYED);
+        }
+        return true;
+    }
+
+    private void updateOrderStatus(String orderSn, Integer payed) {
+        baseMapper.updateOrderStatus(orderSn,payed);
     }
 
 

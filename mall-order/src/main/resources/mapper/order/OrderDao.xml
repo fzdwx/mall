@@ -49,5 +49,7 @@
         <result property="modifyTime" column="modify_time"/>
     </resultMap>
 
-
+    <delete id="updateOrderStatus">
+        update  `mall-order`.oms_order set `status` = #{payed} where order_sn = #{orderSn}
+    </delete>
 </mapper>

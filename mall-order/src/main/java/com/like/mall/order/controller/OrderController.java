@@ -25,6 +25,13 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+    @PostMapping("/listWithItem")
+    public R listWithItem(@RequestParam Map<String, Object> params) {
+        // 1.查询当前登录用户的所有订单
+        PageUtils pageUtils= orderService.queryPageWithItem(params);
+        return  R.ok().put("page",pageUtils);
+    }
+
     @GetMapping("/status/{orderSn}")
     public Integer getOrderStatus(@PathVariable String orderSn) {
         OrderEntity order = orderService.getOne(new QueryWrapper<OrderEntity>().eq("order_sn", orderSn));

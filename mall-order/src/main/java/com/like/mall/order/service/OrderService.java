@@ -3,10 +3,7 @@ package com.like.mall.order.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.order.entity.OrderEntity;
-import com.like.mall.order.vo.OrderConfirmVo;
-import com.like.mall.order.vo.OrderSubmitRespVo;
-import com.like.mall.order.vo.OrderSubmitVo;
-import com.like.mall.order.vo.PayVo;
+import com.like.mall.order.vo.*;
 
 import java.util.Map;
 
@@ -34,5 +31,9 @@ public interface OrderService extends IService<OrderEntity> {
      * @return {@link PayVo}
      */
     PayVo getOrderPay(String orderSn);
+
+    PageUtils queryPageWithItem(Map<String, Object> params);
+
+    Boolean handlerAlipayAsync(PayAsyncVo vo);
 }
 

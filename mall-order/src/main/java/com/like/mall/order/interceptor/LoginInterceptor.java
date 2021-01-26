@@ -22,9 +22,14 @@ public class LoginInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if (new AntPathMatcher().match("/order/order/status/**",request.getRequestURI())) {
+
+        if (new AntPathMatcher().match("/order/order/status/**", request.getRequestURI())) {
             return true;
         }
+        if (new AntPathMatcher().match("pay/notify", request.getRequestURI())) {
+            return true;
+        }
+
         HttpSession session = request.getSession();
         MemberVo user = (MemberVo) session.getAttribute(AuthConstant.LOGIN_USER);
         if (user == null) {
@@ -32,6 +37,6 @@ public class LoginInterceptor implements HandlerInterceptor {
         } else {
             loginUser.set(user);
         }
-        return user!=null;
+        return user != null;
     }
 }
