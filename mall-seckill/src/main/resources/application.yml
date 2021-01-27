@@ -36,6 +36,11 @@ spring:
   # mybatis设置
   redis:
     host: 47.112.150.204
+  task:
+    execution:
+      pool:
+        core-size: 5
+        max-size: 50
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml
   global-config:

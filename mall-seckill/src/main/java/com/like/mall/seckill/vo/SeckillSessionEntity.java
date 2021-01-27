@@ -1,8 +1,7 @@
-package com.like.mall.coupon.entity;
+package com.like.mall.seckill.vo;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -17,7 +16,6 @@ import java.util.List;
  * @date 2020-10-25 12:44:42
  */
 @Data
-@TableName("sms_seckill_session")
 public class SeckillSessionEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
