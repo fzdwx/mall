@@ -14,6 +14,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -78,12 +79,40 @@ public class SecKillServiceImpl implements SecKillService {
         return null;
     }
 
+    @Override
+    public SeckillSkuRelationEntity getSkuSecKillInfo(String skuId) {
+        BoundHashOperations<String, String, String> ops =
+                redisTemplate.boundHashOps(SKUKILL_CACHE_PREFIX);
+        Set<String> keys = ops.keys();
+        if (keys == null || keys.size() <= 0) return null;
+        for (String key : keys) {
+            String regx = "\\d_" + skuId;
+            if (Pattern.matches(regx, key)) {
+                String s = ops.get(key);
+                SeckillSkuRelationEntity sec = JSON.parseObject(s, SeckillSkuRelationEntity.class);
+                long now = new Date().getTime();
+                long start = sec.getStartTime();
+                long end = sec.getEndTime();
+                if (now >= start && now <= end) {
+
+                } else {
+                    sec.setRandomCode(null);
+                }
+                return sec;
+            }
+        }
+
+        return null;
+
+    }
+
     private void saveSessionInfos(List<SeckillSessionEntity> list) {
         list.forEach(s -> {
             long start = s.getStartTime().getTime();
             long end = s.getStartTime().getTime();
             String key = Session_CACHE_PREFIX + start + "_" + end;
-            if (redisTemplate.hasKey(key)) return;
+            Boolean aBoolean = redisTemplate.hasKey(key);
+            if (aBoolean != null && aBoolean) return;
             List<String> skuIds = s.getRelationSku().stream().map(sv -> sv.getSkuId().toString()).collect(Collectors.toList());
 
             redisTemplate.opsForList().leftPushAll(key, skuIds);
@@ -94,7 +123,8 @@ public class SecKillServiceImpl implements SecKillService {
         for (SeckillSessionEntity s : list) {
             BoundHashOperations<String, Object, Object> ops = redisTemplate.boundHashOps(SKUKILL_CACHE_PREFIX);
             for (SeckillSkuRelationEntity sr : s.getRelationSku()) {
-                if (redisTemplate.hasKey(sr.getId().toString())) return;
+                Boolean aBoolean = redisTemplate.hasKey(sr.getId().toString());
+                if (aBoolean != null && aBoolean) return;
 
                 // 1,sku基本信息
                 R r = productFeignService.skuInfo(sr.getSkuId());

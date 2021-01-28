@@ -5,6 +5,7 @@ import com.like.mall.seckill.service.SecKillService;
 import com.like.mall.seckill.vo.SeckillSkuRelationEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -20,9 +21,16 @@ public class SecKillController {
 
     @Autowired
     private SecKillService secKillService;
+
     @GetMapping("curtimeSecKillSku")
     public R getCurTime() {
-         List<SeckillSkuRelationEntity> data= secKillService.getCurTimeSkus();
-        return R.ok().put("data",data);
+        List<SeckillSkuRelationEntity> data = secKillService.getCurTimeSkus();
+        return R.ok().put("data", data);
+    }
+
+    @GetMapping("/sku/secKill/{skuId}")
+    public R getSkuSecKillInfo(@PathVariable String skuId) {
+        SeckillSkuRelationEntity s = secKillService.getSkuSecKillInfo(skuId);
+        return R.ok().put("to", s);
     }
 }

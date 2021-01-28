@@ -24,6 +24,8 @@ public class SkuItemVo {
 
     private List<SpuItemAttrGroupVo> groupAttrs;
     private List<SkuItemSaleAttrVo> saleAttrs;
+
+    SeckillSkuRelationEntity seckillInfo;
 }
 
 

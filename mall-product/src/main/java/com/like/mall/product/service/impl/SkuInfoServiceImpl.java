@@ -1,15 +1,19 @@
 package com.like.mall.product.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.common.utils.Query;
+import com.like.mall.common.utils.R;
 import com.like.mall.product.dao.SkuInfoDao;
 import com.like.mall.product.entity.SkuImagesEntity;
 import com.like.mall.product.entity.SkuInfoEntity;
 import com.like.mall.product.entity.SpuInfoDescEntity;
+import com.like.mall.product.feign.SecKillFeignService;
 import com.like.mall.product.service.*;
+import com.like.mall.product.vo.SeckillSkuRelationEntity;
 import com.like.mall.product.vo.SkuItemSaleAttrVo;
 import com.like.mall.product.vo.SkuItemVo;
 import com.like.mall.product.vo.SpuItemAttrGroupVo;
@@ -27,6 +31,19 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Service("skuInfoService")
 public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> implements SkuInfoService {
+
+    @Autowired
+    ThreadPoolExecutor threadPool;
+    @Autowired
+    SkuImagesService skuImagesService;
+    @Autowired
+    SpuInfoDescService spuInfoDescService;
+    @Autowired
+    AttrGroupService attrGroupService;
+    @Autowired
+    SkuSaleAttrValueService skuSaleAttrValueService;
+    @Autowired
+    SecKillFeignService secKillFeignService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -77,11 +94,6 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
         return this.list(new QueryWrapper<SkuInfoEntity>().eq("spu_id", spuId));
     }
 
-
-
-    @Autowired
-    ThreadPoolExecutor threadPool;
-
     @Override
     public SkuItemVo item(Long skuId) {
         SkuItemVo res = new SkuItemVo();
@@ -122,22 +134,22 @@ public class SkuInfoServiceImpl extends ServiceImpl<SkuInfoDao, SkuInfoEntity> i
             res.setImages(images);
         }, threadPool);
 
+        // 查询当前sku是否参与秒杀
+        CompletableFuture<Void> getSkuSec = CompletableFuture.runAsync(() -> {
+            R r = secKillFeignService.getSkuSecKillInfo(String.valueOf(skuId));
+            if (r.getCode() == 0 && r.get("to") != null) {
+                SeckillSkuRelationEntity s = JSON.parseObject(r.get("to").toString(), SeckillSkuRelationEntity.class);
+                res.setSeckillInfo(s);
+            }
+        }, threadPool);
         try {
-            CompletableFuture.allOf(imagesFuture, skuInfoFuture, spuAttrFuture, spuDescFuture, spuSaleFuture).get();
+            CompletableFuture.allOf(imagesFuture, skuInfoFuture, spuAttrFuture, spuDescFuture, spuSaleFuture,getSkuSec).get();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return res;
     }
-    @Autowired
-    SkuImagesService skuImagesService;
-    @Autowired
-    SpuInfoDescService spuInfoDescService;
-    @Autowired
-    AttrGroupService attrGroupService;
-    @Autowired
-    SkuSaleAttrValueService skuSaleAttrValueService;
 
     public void queryCondition(QueryWrapper<SkuInfoEntity> query, Map<String, Object> params, String key, String colName) {
         String status = (String) params.get(key);

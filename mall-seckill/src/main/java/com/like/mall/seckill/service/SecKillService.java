@@ -10,4 +10,5 @@ public interface SecKillService {
     List<SeckillSkuRelationEntity> getCurTimeSkus();
 
 
+    SeckillSkuRelationEntity getSkuSecKillInfo(String skuId);
 }
