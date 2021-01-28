@@ -55,4 +55,10 @@ public class SeckillSkuRelationEntity implements Serializable {
 	// sku信息
 	private SkuInfoEntity skuInfoEntity;
 
+	/** 秒杀开始时间 **/
+	private Long startTime;
+	/** 秒杀结束时间 **/
+	private Long endTime;
+
+	private String randomCode;
 }
