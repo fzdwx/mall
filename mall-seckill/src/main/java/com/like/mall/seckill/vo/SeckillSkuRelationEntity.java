@@ -53,7 +53,7 @@ public class SeckillSkuRelationEntity implements Serializable {
 	private Integer seckillSort;
 
 	// sku信息
-	private SkuInfoEntity skuInfoEntity;
+	private SkuInfoEntity skuInfo;
 
 	/** 秒杀开始时间 **/
 	private Long startTime;

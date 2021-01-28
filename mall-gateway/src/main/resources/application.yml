@@ -69,13 +69,19 @@ spring:
             - Path=/api/auth/**
           filters:
             - RewritePath=/api/(?<segment>.*),/$\{segment}
-      #mall-auth-server
+        #mall-auth-server
         - id: cart_route
           uri: lb://mall-cart
           predicates:
             - Path=/api/cart/**
           filters:
-           - RewritePath=/api/(?<segment>.*),/$\{segment}
-
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+      #mall-auth-server
+        - id: cart_seckill
+          uri: lb://mall-seckill
+          predicates:
+            - Path=/api/seckill/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
   application:
     name: mall-gateway

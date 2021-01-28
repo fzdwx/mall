@@ -2,9 +2,13 @@ package com.like.mall.seckill.scheduled;
 
 import com.like.mall.seckill.service.SecKillService;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author like
@@ -20,11 +24,21 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class SeckillSkuSchedule {
 
+    @Autowired
+    SecKillService secKillService;
+    @Autowired
+    RedissonClient redissonClient;
+    private final String upload_lock = "seckill:upload:lock";
     @Scheduled(cron = "0 0 3 * * ?")
     public void upload() {
         // 1.重複上架無需處理
-        secKillService.upload();
+        // 添加分布式锁
+        RLock lock = redissonClient.getLock(upload_lock);
+        lock.lock(10, TimeUnit.SECONDS);
+        try {
+            secKillService.upload();
+        }finally {
+            lock.unlock();
+        }
     }
-    @Autowired
-    SecKillService secKillService;
 }

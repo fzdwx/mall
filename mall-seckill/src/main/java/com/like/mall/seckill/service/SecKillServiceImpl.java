@@ -13,8 +13,7 @@ import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -54,12 +53,39 @@ public class SecKillServiceImpl implements SecKillService {
 
     }
 
+    @Override
+    public List<SeckillSkuRelationEntity> getCurTimeSkus() {
+        long now = new Date().getTime();
+        Set<String> keys = redisTemplate.keys(Session_CACHE_PREFIX + "*");
+        if (keys == null || keys.size() <= 0) return null;
+
+        for (String key : keys) {
+            String replace = key.replace(Session_CACHE_PREFIX, "");
+            String[] s = replace.split("_");
+            long start = Long.parseLong(s[0]);
+            long end = Long.parseLong(s[1]);
+            if (now >= start && now <= end) {
+                // 查询当前场次
+                List<String> range = redisTemplate.opsForList().range(key, -100, 100);
+                BoundHashOperations<String, Object, Object> ops =
+                        redisTemplate.boundHashOps(SKUKILL_CACHE_PREFIX);
+                List<Object> data = ops.multiGet(Collections.singleton(range));
+                if (data == null) return null;
+
+                return data.stream().map(o -> JSON.parseObject(o.toString(), SeckillSkuRelationEntity.class)).collect(Collectors.toList());
+            }
+        }
+        return null;
+    }
+
     private void saveSessionInfos(List<SeckillSessionEntity> list) {
         list.forEach(s -> {
             long start = s.getStartTime().getTime();
             long end = s.getStartTime().getTime();
             String key = Session_CACHE_PREFIX + start + "_" + end;
+            if (redisTemplate.hasKey(key)) return;
             List<String> skuIds = s.getRelationSku().stream().map(sv -> sv.getSkuId().toString()).collect(Collectors.toList());
+
             redisTemplate.opsForList().leftPushAll(key, skuIds);
         });
     }
@@ -68,11 +94,13 @@ public class SecKillServiceImpl implements SecKillService {
         for (SeckillSessionEntity s : list) {
             BoundHashOperations<String, Object, Object> ops = redisTemplate.boundHashOps(SKUKILL_CACHE_PREFIX);
             for (SeckillSkuRelationEntity sr : s.getRelationSku()) {
+                if (redisTemplate.hasKey(sr.getId().toString())) return;
+
                 // 1,sku基本信息
                 R r = productFeignService.skuInfo(sr.getSkuId());
                 if (r.getCode() == 0) {
                     SkuInfoEntity skuInfo = ((SkuInfoEntity) r.get("skuInfo"));
-                    sr.setSkuInfoEntity(skuInfo);
+                    sr.setSkuInfo(skuInfo);
                 }
                 // 2.设置秒杀时间范围
                 sr.setStartTime(s.getStartTime().getTime());
