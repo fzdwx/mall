@@ -22,6 +22,18 @@ import java.util.Map;
 @Slf4j
 public class MQConfig {
 
+    @Bean
+    public Queue orderSecKillOrderQueue() {
+            return  new Queue("order.seckill.order.queue",true,false,false);
+    }
+    @Bean
+    public Binding orderSecKillOrderBinding() {
+        System.out.println("创建绑定");
+        return new Binding(
+                "order.seckill.order.queue", Binding.DestinationType.QUEUE,
+                "order-event-exchange", "order.seckill.order", null);
+    }
+
     @RabbitListener(queues = "order.release.order.queue")
     public void listener(OrderEntity order, Channel channel, Message message) throws IOException {
       log.error("收到过期的订单信息：准备关闭订单{}"+order.getOrderSn());

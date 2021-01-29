@@ -1,6 +1,7 @@
 package com.like.mall.order.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.like.mall.common.To.SecKillOrderTo;
 import com.like.mall.common.utils.PageUtils;
 import com.like.mall.order.entity.OrderEntity;
 import com.like.mall.order.vo.*;
@@ -35,5 +36,7 @@ public interface OrderService extends IService<OrderEntity> {
     PageUtils queryPageWithItem(Map<String, Object> params);
 
     Boolean handlerAlipayAsync(PayAsyncVo vo);
+
+    void createSecKillOrder(SecKillOrderTo sec);
 }
 

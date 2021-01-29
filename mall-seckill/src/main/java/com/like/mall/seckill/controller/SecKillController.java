@@ -38,8 +38,8 @@ public class SecKillController {
     public R secKill(@RequestParam("killId") String killId,
                      @RequestParam("key") String key,
                      @RequestParam("num") Integer num) {
-        String orderSn =  secKillService.kill(killId,key,num);
-        return R.ok();
+        String orderSn = secKillService.kill(killId, key, num);
+        return R.ok().put("orderSn",orderSn);
 
     }
 }

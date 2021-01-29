@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.like.mall.common.To.SecKillOrderTo;
 import com.like.mall.common.To.mq.OrderTo;
 import com.like.mall.common.constant.OrderConstant;
 import com.like.mall.common.exception.NoStockException;
@@ -230,15 +231,29 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         // 2.修改狀態
         if (vo.getTrade_status().equals("TRADE_SUCCESS") || vo.getTrade_status().equals("TRADE_FINISHED")) {
             String orderSn = vo.getOut_trade_no();
-            updateOrderStatus(orderSn,OrderConstant.PAYED);
+            updateOrderStatus(orderSn, OrderConstant.PAYED);
         }
         return true;
     }
 
-    private void updateOrderStatus(String orderSn, Integer payed) {
-        baseMapper.updateOrderStatus(orderSn,payed);
-    }
+    @Override
+    public void createSecKillOrder(SecKillOrderTo sec) {
+        OrderEntity order = new OrderEntity();
+        order.setOrderSn(sec.getOrderSn());
+        order.setMemberId(sec.getMemberId());
+        order.setStatus(OrderConstant.CreateNew);
+        order.setPayAmount(sec.getSeckillPrice().multiply(new BigDecimal(sec.getNum())));
+        save(order);
 
+        // TODO: 2021/1/29 保存订单信息
+        OrderItemEntity orderItem = new OrderItemEntity();
+        orderItem.setOrderSn(order.getOrderSn());
+        orderItem.setRealAmount(sec.getSeckillPrice().multiply(new BigDecimal(sec.getNum())));
+        orderItem.setSkuQuantity(sec.getNum());
+        orderItemService.save(orderItem);
+        // TODO: 2021/1/29 保存spu信息
+
+    }
 
     private OrderEntity builderOrder(OrderSubmitVo vo, String orderSn) {
         MemberVo user = loginUser.get();
@@ -302,5 +317,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         order.setModifyTime(new Date());
         this.save(order);
         orderItemService.saveBatch(to.getOrderItems());
+    }
+
+    private void updateOrderStatus(String orderSn, Integer payed) {
+        baseMapper.updateOrderStatus(orderSn, payed);
     }
 }

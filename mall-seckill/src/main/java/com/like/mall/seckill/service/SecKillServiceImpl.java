@@ -2,6 +2,7 @@ package com.like.mall.seckill.service;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.like.mall.common.To.SecKillOrderTo;
 import com.like.mall.common.utils.R;
 import com.like.mall.common.vo.MemberVo;
 import com.like.mall.common.vo.SkuInfoEntity;
@@ -11,6 +12,8 @@ import com.like.mall.seckill.vo.SeckillSessionEntity;
 import com.like.mall.seckill.vo.SeckillSkuRelationEntity;
 import org.redisson.api.RSemaphore;
 import org.redisson.api.RedissonClient;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -30,7 +33,8 @@ import static com.like.mall.seckill.interceptor.LoginInterceptor.loginUser;
  */
 @Service
 public class SecKillServiceImpl implements SecKillService {
-
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
     private final static String Session_CACHE_PREFIX = "seckill:session";
     private final static String SKUKILL_CACHE_PREFIX = "seckill_skus";
     private final String SKU_STOCK_SEMAPHORE = "seckill:stock:"; // + 商品随机码
@@ -139,7 +143,17 @@ public class SecKillServiceImpl implements SecKillService {
 
         try {
             boolean b1 = semaphore.tryAcquire(num, 100, TimeUnit.MILLISECONDS);
-            return IdWorker.getTimeId();
+            if (!b1) return null;
+
+            SecKillOrderTo secTo =  new SecKillOrderTo();
+            String orderSn = IdWorker.getTimeId();
+            secTo.setOrderSn(orderSn);
+            secTo.setMemberId(user.getId());
+            secTo.setNum(num);
+            secTo.setPromotionSessionId(sec.getPromotionSessionId());
+            secTo.setSkuId(sec.getSkuId());
+            rabbitTemplate.convertAndSend("order-event-exchange","order.seckill.order",secTo);
+            return orderSn;
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
