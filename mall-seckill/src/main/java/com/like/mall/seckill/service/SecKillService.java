@@ -11,4 +11,6 @@ public interface SecKillService {
 
 
     SeckillSkuRelationEntity getSkuSecKillInfo(String skuId);
+
+    String kill(String killId, String key, Integer num);
 }

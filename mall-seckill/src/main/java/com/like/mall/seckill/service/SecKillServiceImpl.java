@@ -1,7 +1,9 @@
 package com.like.mall.seckill.service;
 
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.like.mall.common.utils.R;
+import com.like.mall.common.vo.MemberVo;
 import com.like.mall.common.vo.SkuInfoEntity;
 import com.like.mall.seckill.feign.CouponFeignService;
 import com.like.mall.seckill.feign.ProductFeignService;
@@ -14,8 +16,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static com.like.mall.seckill.interceptor.LoginInterceptor.loginUser;
 
 /**
  * @author like
@@ -104,6 +109,41 @@ public class SecKillServiceImpl implements SecKillService {
 
         return null;
 
+    }
+
+    @Override
+    public String kill(String killId, String key, Integer num) {
+        BoundHashOperations<String, String, String> ops = redisTemplate.boundHashOps(SKUKILL_CACHE_PREFIX);
+        String s = ops.get(killId);
+        if (s == null) { return null;}
+        SeckillSkuRelationEntity sec = JSON.parseObject(s, SeckillSkuRelationEntity.class);
+
+        long now = new Date().getTime();
+        long start = sec.getStartTime();
+        long end = sec.getEndTime();
+        if (now < start || now > end) return null;
+
+        String randomCode = sec.getRandomCode();
+        String skuId = sec.getPromotionSessionId() + "_" + sec.getSkuId();
+        if (!randomCode.equals(key) || !killId.equals(skuId)) return null;
+        if (num >= sec.getSeckillLimit().intValue()) return null;
+
+
+        MemberVo user = loginUser.get();
+        String s1 = user.getId() + "_" + skuId;
+
+        Boolean b = redisTemplate.opsForValue().setIfAbsent(s1, num.toString(), end - start, TimeUnit.MILLISECONDS);
+        if (b != null && !b) return null;
+
+        RSemaphore semaphore = redissonClient.getSemaphore(SKU_STOCK_SEMAPHORE + randomCode);
+
+        try {
+            boolean b1 = semaphore.tryAcquire(num, 100, TimeUnit.MILLISECONDS);
+            return IdWorker.getTimeId();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private void saveSessionInfos(List<SeckillSessionEntity> list) {
