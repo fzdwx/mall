@@ -1,6 +1,5 @@
 server:
   port: 16000
-
 spring:
   session:
     store-type: redis
@@ -27,8 +26,12 @@ spring:
     nacos:
       # 注册地址
       discovery:
-        server-addr:  47.112.150.204:8848
-#    alibaba:
+        server-addr: 47.112.150.204:8848
+    sentinel:
+      transport:
+        dashboard: localhost:8080
+        port: 8719
+  #    alibaba:
 #      seata:
 #        tx-service-group: mall-order-fescar-service-group
   application:
@@ -56,3 +59,10 @@ thread:
 feign:
   httpclient:
     connection-timeout: 30000
+  sentinel:
+    enabled: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: *
